@@ -24,6 +24,16 @@
         {
         }
 
+        public DbSet<NodeModel> Nodes { get; set; }
+
+        public DbSet<EdgeModel> Edges { get; set; }
+
+        public DbSet<NodeModifier> NodeModifiers { get; set; }
+
+        public DbSet<Shipment> Shipments { get; set; }
+
+        public DbSet<ShipmentConstraint> ShipmentConstraints { get; set; }
+
         public override int SaveChanges() => this.SaveChanges(true);
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
