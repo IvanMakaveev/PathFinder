@@ -1,21 +1,10 @@
 ﻿namespace PathFinder.Web
 {
     using System.Reflection;
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.IdentityModel.Tokens;
     using System.Text;
+    using System.Threading.Tasks;
 
-    using PathFinder.Data;
-    using PathFinder.Data.Common;
-    using PathFinder.Data.Common.Repositories;
-    using PathFinder.Data.Models;
-    using PathFinder.Data.Repositories;
-    using PathFinder.Data.Seeding;
-    //using PathFinder.Services.Data;
-    using PathFinder.Services.Mapping;
-    using PathFinder.Services.Messaging;
-    using PathFinder.Web.ViewModels;
-
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -24,7 +13,17 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using System.Threading.Tasks;
+    using Microsoft.IdentityModel.Tokens;
+    using PathFinder.Data;
+    using PathFinder.Data.Common;
+    using PathFinder.Data.Common.Repositories;
+    using PathFinder.Data.Models;
+    using PathFinder.Data.Repositories;
+    using PathFinder.Data.Seeding;
+    using PathFinder.Services;
+    using PathFinder.Services.Mapping;
+    using PathFinder.Services.Messaging;
+    using PathFinder.Web.ViewModels;
 
     public class Program
     {
@@ -86,6 +85,7 @@
 
             // Application services
             services.AddTransient<IEmailSender, NullMessageSender>();
+            services.AddTransient<IPathfindingService, PathfindingService>();
         }
 
         private static void Configure(WebApplication app)

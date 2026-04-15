@@ -2,9 +2,8 @@
 {
     using System.Linq;
 
-    using PathFinder.Data.Common.Models;
-
     using Microsoft.EntityFrameworkCore;
+    using PathFinder.Data.Common.Models;
 
     internal static class EntityIndexesConfiguration
     {

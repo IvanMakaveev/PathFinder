@@ -3,9 +3,8 @@
     using System;
     using System.Threading.Tasks;
 
-    using PathFinder.Data.Common;
-
     using Microsoft.EntityFrameworkCore;
+    using PathFinder.Data.Common;
 
     public class DbQueryRunner : IDbQueryRunner
     {

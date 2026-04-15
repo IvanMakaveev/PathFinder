@@ -6,11 +6,10 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    using PathFinder.Data.Common.Models;
-    using PathFinder.Data.Models;
-
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
+    using PathFinder.Data.Common.Models;
+    using PathFinder.Data.Models;
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
@@ -30,9 +29,9 @@
 
         public DbSet<NodeModifier> NodeModifiers { get; set; }
 
-        public DbSet<Shipment> Shipments { get; set; }
+        public DbSet<ShipmentModel> Shipments { get; set; }
 
-        public DbSet<ShipmentConstraint> ShipmentConstraints { get; set; }
+        public DbSet<ShipmentConstraintModel> ShipmentConstraints { get; set; }
 
         public override int SaveChanges() => this.SaveChanges(true);
 

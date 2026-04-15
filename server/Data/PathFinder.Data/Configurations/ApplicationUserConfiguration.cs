@@ -1,8 +1,8 @@
 ﻿namespace PathFinder.Data.Configurations
 {
-    using PathFinder.Data.Models;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using PathFinder.Data.Models;
 
     public class ApplicationUserConfiguration : IEntityTypeConfiguration<ApplicationUser>
     {

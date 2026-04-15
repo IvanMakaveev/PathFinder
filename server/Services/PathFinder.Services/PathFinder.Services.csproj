@@ -6,4 +6,11 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Data\PathFinder.Data.Common\PathFinder.Data.Common.csproj" />
+    <ProjectReference Include="..\..\Data\PathFinder.Data.Models\PathFinder.Data.Models.csproj" />
+    <ProjectReference Include="..\PathFinder.Services.Data\PathFinder.Services.Data.csproj" />
+    <ProjectReference Include="..\PathFinder.Services.Mapping\PathFinder.Services.Mapping.csproj" />
+  </ItemGroup>
+
 </Project>

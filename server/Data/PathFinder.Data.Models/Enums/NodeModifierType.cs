@@ -3,5 +3,6 @@
     public enum NodeModifierType
     {
         CoolantNode,
+        HazardNode,
     }
 }

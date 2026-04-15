@@ -2,7 +2,7 @@
 {
     using PathFinder.Data.Common.Models;
 
-    public class Shipment : BaseDeletableModel<int>
+    public class ShipmentModel : BaseDeletableModel<int>
     {
         public string Name { get; set; }
 
@@ -16,6 +16,6 @@
 
         public virtual NodeModel EndNode { get; set; }
 
-        public virtual ShipmentConstraint ShipmentConstraint { get; set; }
+        public virtual ShipmentConstraintModel ShipmentConstraint { get; set; }
     }
 }
