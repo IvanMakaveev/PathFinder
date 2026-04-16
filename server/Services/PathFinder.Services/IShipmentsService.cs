@@ -4,10 +4,13 @@
     using System.Threading.Tasks;
 
     using PathFinder.Services.Data;
+    using PathFinder.Services.Data.DTOs;
 
-    public interface IShipmentService
+    public interface IShipmentsService
     {
-        IEnumerable<string> GetShipmentNames();
+        IEnumerable<SimpleShipmentDto> GetShipmentsList();
+
+        ShipmentDto GetShipmentData(int shipmentId);
 
         Shipment GetShipmentById(int shipmentId);
 

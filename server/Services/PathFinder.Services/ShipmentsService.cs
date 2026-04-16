@@ -10,10 +10,11 @@
     using PathFinder.Data.Common.Repositories;
     using PathFinder.Data.Models;
     using PathFinder.Services.Data;
+    using PathFinder.Services.Data.DTOs;
     using PathFinder.Services.Data.Factories;
     using PathFinder.Services.Mapping;
 
-    public class ShipmentsService : IShipmentService
+    public class ShipmentsService : IShipmentsService
     {
         private readonly IDeletableEntityRepository<ShipmentModel> shipmentRepository;
         private readonly IDeletableEntityRepository<ShipmentConstraintModel> constraintRepository;
@@ -98,10 +99,17 @@
             return shipment;
         }
 
-        public IEnumerable<string> GetShipmentNames()
+        public ShipmentDto GetShipmentData(int shipmentId)
             => this.shipmentRepository
                 .AllAsNoTracking()
-                .Select(s => s.Name)
+                .Where(s => s.Id == shipmentId)
+                .To<ShipmentDto>()
+                .FirstOrDefault();
+
+        public IEnumerable<SimpleShipmentDto> GetShipmentsList()
+            => this.shipmentRepository
+                .AllAsNoTracking()
+                .To<SimpleShipmentDto>()
                 .ToList();
 
         public async Task RemoveConstraint(int shipmentId)

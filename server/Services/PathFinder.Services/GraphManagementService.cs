@@ -4,12 +4,12 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-
+    using Microsoft.EntityFrameworkCore;
     using PathFinder.Data.Common.Repositories;
     using PathFinder.Data.Models;
     using PathFinder.Data.Models.Enums;
-    using PathFinder.Services.Data;
-    using PathFinder.Services.Data.GraphResult;
+    using PathFinder.Services.Data.DTOs;
+    using PathFinder.Services.Mapping;
 
     public class GraphManagementService : IGraphManagementService
     {
@@ -98,31 +98,29 @@
             return node.Id;
         }
 
-        public Graph GetGraph()
-        {
-            return new Graph
-            {
-                Nodes = this.nodesRepository.All().Select(n => new NodeResult
-                {
-                    Id = n.Id,
-                    Name = n.Name,
-                    NodeType = n.NodeType,
-                }).ToList(),
-                Edges = this.edgesRepository.All().Select(e => new EdgeResult
-                {
-                    Id = e.Id,
-                    FromNodeId = e.FromNodeId,
-                    ToNodeId = e.ToNodeId,
-                    Length = e.Length,
-                }).ToList(),
-            };
-        }
+        public EdgeDto GetEdge(int edgeId)
+            => this.edgesRepository.AllAsNoTracking()
+                .Where(e => e.Id == edgeId)
+                .To<EdgeDto>()
+                .FirstOrDefault();
 
-        public IList<NodeModifier> GetNodeModifiers(int nodeId)
-        {
-            return this.nodeModifiersRepository.All()
+        public GraphDto GetGraph()
+            => new GraphDto
+            {
+                Nodes = this.nodesRepository.AllAsNoTracking().To<NodeDto>().ToList(),
+                Edges = this.edgesRepository.AllAsNoTracking().To<EdgeDto>().ToList(),
+            };
+
+        public NodeDto GetNodeById(int nodeId)
+            => this.nodesRepository.AllAsNoTracking()
+                .Where(n => n.Id == nodeId)
+                .To<NodeDto>()
+                .FirstOrDefault();
+
+        public IList<NodeModifierDto> GetNodeModifiers(int nodeId)
+            => this.nodeModifiersRepository.All()
                 .Where(m => m.NodeId == nodeId)
-                .Select(m => new NodeModifier
+                .Select(m => new NodeModifierDto
                 {
                     Id = m.Id,
                     NodeId = m.NodeId,
@@ -130,7 +128,6 @@
                     ModifierValue = m.ModifierValue,
                 })
                 .ToList();
-        }
 
         public async Task RemoveEdgeAsync(int edgeId)
         {
@@ -156,7 +153,7 @@
 
         public async Task RemoveNodeAsync(int nodeId)
         {
-            var node = this.nodesRepository.All().FirstOrDefault(n => n.Id == nodeId);
+            var node = this.nodesRepository.All().Include(n => n.InEdges).Include(n => n.OutEdges).FirstOrDefault(n => n.Id == nodeId);
 
             if (node != null)
             {

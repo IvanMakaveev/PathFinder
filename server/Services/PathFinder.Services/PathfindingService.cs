@@ -14,7 +14,7 @@
     {
         private readonly IDeletableEntityRepository<NodeModel> nodesRepository;
         private readonly IDeletableEntityRepository<EdgeModel> edgesRepository;
-        private readonly IShipmentService shipmentService;
+        private readonly IShipmentsService shipmentService;
 
         private Dictionary<int, Node> nodes;
         private Dictionary<int, List<Edge>> adjacencyList;
@@ -22,7 +22,7 @@
         public PathfindingService(
             IDeletableEntityRepository<NodeModel> nodesRepository,
             IDeletableEntityRepository<EdgeModel> edgesRepository,
-            IShipmentService shipmentService)
+            IShipmentsService shipmentService)
         {
             this.nodesRepository = nodesRepository;
             this.edgesRepository = edgesRepository;

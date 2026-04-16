@@ -4,14 +4,17 @@
     using System.Threading.Tasks;
 
     using PathFinder.Data.Models.Enums;
-    using PathFinder.Services.Data;
-    using PathFinder.Services.Data.GraphResult;
+    using PathFinder.Services.Data.DTOs;
 
     public interface IGraphManagementService
     {
-        Graph GetGraph();
+        GraphDto GetGraph();
 
-        IList<NodeModifier> GetNodeModifiers(int nodeId);
+        NodeDto GetNodeById(int nodeId);
+
+        EdgeDto GetEdge(int edgeId);
+
+        IList<NodeModifierDto> GetNodeModifiers(int nodeId);
 
         Task<int> CreateNodeAsync(string name, NodeType nodeType);
 

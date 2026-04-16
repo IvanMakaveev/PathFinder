@@ -1,0 +1,63 @@
+.error-handler {
+	min-height: 60vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	padding: 2rem;
+	text-align: center;
+}
+
+.error-handler__title {
+	margin: 0;
+	font-size: clamp(1.8rem, 4vw, 2.4rem);
+	color: #111827;
+}
+
+.error-handler__message {
+	margin: 0;
+	max-width: 520px;
+	line-height: 1.5;
+	color: #374151;
+}
+
+.error-handler__actions {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+	justify-content: center;
+	margin-top: 0.5rem;
+}
+
+.error-handler__button {
+	border: 1px solid #d1d5db;
+	background: #ffffff;
+	color: #111827;
+	padding: 0.6rem 1.1rem;
+	border-radius: 10px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.error-handler__button:hover {
+	background: #f9fafb;
+	box-shadow: 0 6px 14px rgba(17, 24, 39, 0.1);
+	transform: translateY(-1px);
+}
+
+.error-handler__button:active {
+	transform: translateY(0);
+	box-shadow: none;
+}
+
+.error-handler__button--primary {
+	background: #2563eb;
+	border-color: #2563eb;
+	color: #ffffff;
+}
+
+.error-handler__button--primary:hover {
+	background: #1d4ed8;
+}

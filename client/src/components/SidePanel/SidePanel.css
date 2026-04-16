@@ -1,0 +1,28 @@
+.side-panel {
+  height: calc(100vh - 2.5rem);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 1rem;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.side-panel__title {
+  margin: 0 0 0.5rem 0;
+}
+
+.side-panel__text {
+  margin: 0 0 0.5rem 0;
+}
+
+.side-panel__hint {
+  margin: 0;
+  color: #4b5563;
+}
+
+@media (max-width: 900px) {
+  .side-panel {
+    height: 50vh;
+  }
+}

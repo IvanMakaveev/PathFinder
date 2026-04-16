@@ -1,10 +1,10 @@
-﻿namespace PathFinder.Services.Data
+﻿namespace PathFinder.Services.Data.DTOs
 {
     using PathFinder.Data.Models;
     using PathFinder.Data.Models.Enums;
     using PathFinder.Services.Mapping;
 
-    public class NodeModifier : IMapFrom<NodeModifierModel>
+    public class NodeModifierDto : IMapFrom<NodeModifierModel>
     {
         public int Id { get; set; }
 

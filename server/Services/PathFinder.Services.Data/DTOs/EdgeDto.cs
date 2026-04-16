@@ -1,6 +1,9 @@
-﻿namespace PathFinder.Services.Data.GraphResult
+﻿namespace PathFinder.Services.Data.DTOs
 {
-    public class EdgeResult
+    using PathFinder.Data.Models;
+    using PathFinder.Services.Mapping;
+
+    public class EdgeDto : IMapFrom<EdgeModel>
     {
         public int Id { get; set; }
 

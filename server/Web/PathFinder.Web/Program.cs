@@ -86,6 +86,8 @@
             // Application services
             services.AddTransient<IEmailSender, NullMessageSender>();
             services.AddTransient<IPathfindingService, PathfindingService>();
+            services.AddTransient<IGraphManagementService, GraphManagementService>();
+            services.AddTransient<IShipmentsService, ShipmentsService>();
         }
 
         private static void Configure(WebApplication app)
