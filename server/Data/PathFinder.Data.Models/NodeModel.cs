@@ -11,7 +11,7 @@
         {
             this.InEdges = new HashSet<EdgeModel>();
             this.OutEdges = new HashSet<EdgeModel>();
-            this.Modifiers = new HashSet<NodeModifier>();
+            this.Modifiers = new HashSet<NodeModifierModel>();
         }
 
         public string Name { get; set; }
@@ -22,6 +22,6 @@
 
         public virtual ICollection<EdgeModel> OutEdges { get; set; }
 
-        public virtual ICollection<NodeModifier> Modifiers { get; set; }
+        public virtual ICollection<NodeModifierModel> Modifiers { get; set; }
     }
 }

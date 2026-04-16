@@ -7,5 +7,6 @@
         MaxLength,
         And,
         Or,
+        Special,
     }
 }

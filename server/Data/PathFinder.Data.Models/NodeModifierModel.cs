@@ -3,7 +3,7 @@
     using PathFinder.Data.Common.Models;
     using PathFinder.Data.Models.Enums;
 
-    public class NodeModifier : BaseDeletableModel<int>
+    public class NodeModifierModel : BaseDeletableModel<int>
     {
         public int NodeId { get; set; }
 

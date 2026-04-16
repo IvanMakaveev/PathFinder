@@ -2,8 +2,7 @@
 {
     public enum NodeType
     {
-        Pickup,
-        Dropoff,
-        Warehouse,
+        NormalNode,
+        BrokenNode,
     }
 }

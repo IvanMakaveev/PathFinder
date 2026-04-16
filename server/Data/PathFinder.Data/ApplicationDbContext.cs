@@ -27,7 +27,7 @@
 
         public DbSet<EdgeModel> Edges { get; set; }
 
-        public DbSet<NodeModifier> NodeModifiers { get; set; }
+        public DbSet<NodeModifierModel> NodeModifiers { get; set; }
 
         public DbSet<ShipmentModel> Shipments { get; set; }
 

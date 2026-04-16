@@ -7,24 +7,21 @@
     using PathFinder.Data.Models.Enums;
     using PathFinder.Services.Mapping;
 
-    public class Node : IMapFrom<NodeModel>, IHaveCustomMappings
+    public abstract class Node
     {
+        protected Node(int id, string name, Dictionary<NodeModifierType, int> modifiers)
+        {
+            this.Id = id;
+            this.Name = name;
+            this.Modifiers = modifiers;
+        }
+
         public int Id { get; set; }
 
         public string Name { get; set; }
 
-        public NodeType NodeType { get; set; }
-
         public Dictionary<NodeModifierType, int> Modifiers { get; set; }
 
-        public void CreateMappings(Mapster.TypeAdapterConfig configuration)
-        {
-            configuration.NewConfig<NodeModel, Node>()
-                .Map(dest => dest.Modifiers, src => src.Modifiers != null
-                    ? src.Modifiers.ToDictionary(
-                        nm => nm.ModifierType,
-                        nm => nm.ModifierValue)
-                    : new Dictionary<NodeModifierType, int>());
-        }
+        public abstract void ModifyContext(PathFindingContext context);
     }
 }

@@ -1,7 +1,7 @@
-﻿using PathFinder.Data.Models.Enums;
-
-namespace PathFinder.Services.Data
+﻿namespace PathFinder.Services.Data.Constraints
 {
+    using PathFinder.Data.Models.Enums;
+
     public class CoolingConstraint : ShipmentConstraint
     {
         public int Value { get; set; }
@@ -9,7 +9,7 @@ namespace PathFinder.Services.Data
         public override bool IsSatisfied(Node currentNode, PathFindingContext context)
         {
             return currentNode.Modifiers.ContainsKey(NodeModifierType.CoolantNode)
-                && currentNode.Modifiers[NodeModifierType.CoolantNode] >= this.Value;
+                && currentNode.Modifiers[NodeModifierType.CoolantNode] <= this.Value;
         }
     }
 }

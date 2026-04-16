@@ -1,13 +1,9 @@
-﻿
-namespace PathFinder.Services.Data
+﻿namespace PathFinder.Services.Data.Constraints
 {
-    using System.Collections.Generic;
     using System.Linq;
 
-    public class AndConstraint : ShipmentConstraint
+    public class AndConstraint : CompositeConstraint
     {
-        public ICollection<ShipmentConstraint> Constraints { get; set; }
-
         public override bool IsSatisfied(Node currentNode, PathFindingContext context)
         {
             return this.Constraints.All(constraint => constraint.IsSatisfied(currentNode, context));

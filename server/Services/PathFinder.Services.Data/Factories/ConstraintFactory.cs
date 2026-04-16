@@ -6,6 +6,7 @@
 
     using PathFinder.Data.Models;
     using PathFinder.Data.Models.Enums;
+    using PathFinder.Services.Data.Constraints;
 
     public static class ConstraintFactory
     {
@@ -67,7 +68,7 @@
 
             var parentConstraint = constraintById[parentId];
 
-            if (parentConstraint is not AndConstraint and not OrConstraint)
+            if (parentConstraint is not CompositeConstraint)
             {
                 throw new InvalidOperationException($"Constraint {parentId} has children but is not a composite constraint.");
             }
@@ -76,16 +77,7 @@
             {
                 var childConstraint = constraintById[childModel.Id];
 
-                switch (parentConstraint)
-                {
-                    case AndConstraint andConstraint:
-                        andConstraint.Constraints.Add(childConstraint);
-                        break;
-
-                    case OrConstraint orConstraint:
-                        orConstraint.Constraints.Add(childConstraint);
-                        break;
-                }
+                ((CompositeConstraint)parentConstraint).Constraints.Add(childConstraint);
 
                 AttachChildren(childModel.Id, constraintById, childrenByParentId);
             }

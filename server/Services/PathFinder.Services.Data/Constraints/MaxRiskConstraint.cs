@@ -1,4 +1,4 @@
-﻿namespace PathFinder.Services.Data
+﻿namespace PathFinder.Services.Data.Constraints
 {
     public class MaxRiskConstraint : ShipmentConstraint
     {
