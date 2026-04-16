@@ -4,7 +4,7 @@
     {
         public int Value { get; set; }
 
-        public override bool IsSatisfied(Node currentNode, TrackingContext context)
+        public override bool IsSatisfied(Node currentNode, PathFindingContext context)
         {
             return context.PathRisk <= this.Value;
         }

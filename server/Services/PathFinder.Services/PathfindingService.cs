@@ -2,12 +2,11 @@
 {
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
+
     using Mapster;
     using Microsoft.EntityFrameworkCore;
     using PathFinder.Data.Common.Repositories;
     using PathFinder.Data.Models;
-    using PathFinder.Data.Models.Enums;
     using PathFinder.Services.Data;
     using PathFinder.Services.Data.Factories;
     using PathFinder.Services.Mapping;
@@ -37,22 +36,6 @@
             this.LoadGraph();
         }
 
-        private void LoadGraph()
-        {
-            this.nodes = this.nodesRepository
-                .AllAsNoTracking()
-                .Include(n => n.Modifiers)
-                .ToList()
-                .Adapt<List<Node>>()
-                .ToDictionary(n => n.Id);
-
-            this.adjacencyList = this.edgesRepository
-                .AllAsNoTracking()
-                .To<Edge>()
-                .GroupBy(e => e.FromNodeId)
-                .ToDictionary(g => g.Key, g => g.ToList());
-        }
-
         public List<int> FindPathAsnyc(int shipmentId)
         {
             var shipment = this.shipmentRepository
@@ -67,13 +50,91 @@
                 .Where(c => c.ShipmentId == shipmentId)
                 .ToList());
 
-            var context = new TrackingContext();
-            return GetShortestPath(shipment, context);
+            return this.GetShortestPath(shipment);
         }
 
-        private List<int> GetShortestPath(Shipment shipment, TrackingContext context)
+        private List<int> BuildPath(int startId, int endId, Dictionary<int, int> previous)
         {
-            return new List<int>();
+            List<int> path = new List<int>();
+
+            while (endId != startId)
+            {
+                path.Add(endId);
+                endId = previous[endId];
+            }
+
+            path.Add(startId);
+            path.Reverse();
+            return path;
+        }
+
+        private List<int> GetShortestPath(Shipment shipment)
+        {
+            Dictionary<int, long> dist = this.nodes.ToDictionary(n => n.Key, n => long.MaxValue);
+            Dictionary<int, bool> visited = this.nodes.ToDictionary(n => n.Key, n => false);
+            Dictionary<int, int> previous = new Dictionary<int, int>();
+
+            dist[shipment.StartNodeId] = 0;
+            var pq = new PriorityQueue<PathFindingContext, long>();
+            pq.Enqueue(new PathFindingContext(shipment.StartNodeId, 0, 0), 0);
+
+            while (pq.Count > 0)
+            {
+                var context = pq.Dequeue();
+
+                if (visited[context.CurrentNodeId])
+                {
+                    continue;
+                }
+
+                visited[context.CurrentNodeId] = true;
+
+                if (shipment.EndNodeId == context.CurrentNodeId)
+                {
+                    return this.BuildPath(shipment.StartNodeId, shipment.EndNodeId, previous);
+                }
+
+                foreach (var edge in this.adjacencyList[context.CurrentNodeId])
+                {
+                    if (visited[edge.ToNodeId])
+                    {
+                        continue;
+                    }
+
+                    var newDistance = context.TotalPathLength + edge.Length;
+
+                    if (dist[edge.ToNodeId] > newDistance)
+                    {
+                        var newContext = new PathFindingContext(edge.ToNodeId, newDistance, context.PathRisk);
+                        //this.nodes[edge.ToNodeId].ModifyPath(newContext);
+
+                        if (shipment.ShipmentConstraint.IsSatisfied(this.nodes[edge.ToNodeId], newContext))
+                        {
+                            dist[newContext.CurrentNodeId] = newContext.TotalPathLength;
+                            previous[newContext.CurrentNodeId] = context.CurrentNodeId;
+                            pq.Enqueue(newContext, newContext.TotalPathLength);
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private void LoadGraph()
+        {
+            this.nodes = this.nodesRepository
+                .AllAsNoTracking()
+                .Include(n => n.Modifiers)
+                .ToList()
+                .Adapt<List<Node>>()
+                .ToDictionary(n => n.Id);
+
+            this.adjacencyList = this.edgesRepository
+                .AllAsNoTracking()
+                .To<Edge>()
+                .GroupBy(e => e.FromNodeId)
+                .ToDictionary(g => g.Key, g => g.ToList());
         }
     }
 }

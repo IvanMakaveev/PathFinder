@@ -4,6 +4,6 @@
     {
         public int Id { get; set; }
 
-        public abstract bool IsSatisfied(Node currentNode, TrackingContext context);
+        public abstract bool IsSatisfied(Node currentNode, PathFindingContext context);
     }
 }

@@ -8,7 +8,7 @@ namespace PathFinder.Services.Data
     {
         public ICollection<ShipmentConstraint> Constraints { get; set; }
 
-        public override bool IsSatisfied(Node currentNode, TrackingContext context)
+        public override bool IsSatisfied(Node currentNode, PathFindingContext context)
         {
             return this.Constraints.Any(constraint => constraint.IsSatisfied(currentNode, context));
         }
