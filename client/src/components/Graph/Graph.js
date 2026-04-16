@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import ReactFlow, { Position } from "reactflow";
+import ReactFlow, { MarkerType, Position } from "reactflow";
 import dagre from "dagre";
 import { useNavigate } from "react-router-dom";
 
@@ -8,6 +8,30 @@ import * as graphService from '../../services/graphService';
 
 const nodeTypes = {};
 const edgeTypes = {};
+
+const getNodeTypeColors = (nodeType) => {
+    if (nodeType === "NormalNode" || nodeType === 0 || nodeType === "0") {
+        return {
+            background: "#dcfce7",
+            border: "#16a34a",
+            text: "#14532d",
+        };
+    }
+
+    if (nodeType === "BrokenNode" || nodeType === 1 || nodeType === "1") {
+        return {
+            background: "#ffedd5",
+            border: "#ea580c",
+            text: "#7c2d12",
+        };
+    }
+
+    return {
+        background: "#ffffff",
+        border: "#1f2937",
+        text: "#111827",
+    };
+};
 
 const Graph = () => {
     const navigate = useNavigate();
@@ -33,7 +57,7 @@ const Graph = () => {
         g.setGraph({
             rankdir: "LR",
             ranksep: 150,
-            nodesep: 200,
+            nodesep: 500,
             edgesep: 50,
         });
 
@@ -65,8 +89,10 @@ const Graph = () => {
     const { nodes, edges } = useMemo(() => {
         const sourceNodes = graphData?.nodes ?? [];
         const sourceEdges = graphData?.edges ?? [];
-
+        
         const nodesFromApi = sourceNodes.map((node) => {
+            const colors = getNodeTypeColors(node.nodeType);
+
             return {
                 id: String(node.id),
                 data: { label: node.name ?? `Node ${node.id}` },
@@ -76,7 +102,9 @@ const Graph = () => {
                     width: nodeWidth,
                     height: nodeHeight,
                     borderRadius: "50%",
-                    border: "2px solid #1f2937",
+                    border: `2px solid ${colors.border}`,
+                    backgroundColor: colors.background,
+                    color: colors.text,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -86,7 +114,7 @@ const Graph = () => {
             };
         });
 
-        const edgesFromApi = sourceEdges.map((edge) => {
+        const edgesFromApi = sourceEdges.reverse().map((edge) => {
             const edgeId = edge.id ?? `e-${edge.fromNodeId}-${edge.toNodeId}`;
 
             return {
@@ -96,6 +124,12 @@ const Graph = () => {
                 label: edge.length != null ? String(edge.length) : undefined,
                 type: "straight",
                 style: { strokeWidth: 2 },
+                markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    width: 10,
+                    height: 10,
+                    color: "#1f2937",
+                },
                 labelStyle: {
                     fontSize: 16,
                     fontWeight: 700,

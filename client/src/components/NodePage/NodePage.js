@@ -75,6 +75,7 @@ const normalizeNodeData = (detailsData, modifiersData, fallbackId) => {
 
 const NodePage = () => {
     const { nodeid } = useParams();
+    const [graphRefreshKey, setGraphRefreshKey] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -162,6 +163,7 @@ const NodePage = () => {
                 }
 
                 setSaveMessage('Node type updated.');
+                setGraphRefreshKey((prev) => prev + 1);
             })
             .catch(() => {
                 setSaveMessage('Unable to save node type.');
@@ -195,7 +197,7 @@ const NodePage = () => {
     return (
         <section className="node-page">
             <div className="node-page__graph-shell">
-                <Graph />
+                <Graph key={graphRefreshKey} />
             </div>
             <aside className="node-page__side-panel">
                 <h2 className="node-page__title">Node Details</h2>

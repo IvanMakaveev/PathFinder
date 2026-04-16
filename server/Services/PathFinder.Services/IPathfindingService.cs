@@ -4,6 +4,6 @@
 
     public interface IPathfindingService
     {
-        List<int> FindPath(int shipmentId);
+        List<string> FindPath(int shipmentId);
     }
 }

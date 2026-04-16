@@ -18,6 +18,8 @@
 
         Task<int> AddConstraint(int shipmentId, string constraintData);
 
+        string GetShipmentConstraint(int shipmentId);
+
         Task RemoveConstraint(int shipmentId);
     }
 }

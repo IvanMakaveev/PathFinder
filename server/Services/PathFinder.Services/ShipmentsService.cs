@@ -1,18 +1,18 @@
 ﻿namespace PathFinder.Services
 {
+    using PathFinder.Data.Common.Repositories;
+    using PathFinder.Data.Models;
+    using PathFinder.Services.Data;
+    using PathFinder.Services.Data.Constraints;
+    using PathFinder.Services.Data.DTOs;
+    using PathFinder.Services.Data.Factories;
+    using PathFinder.Services.Mapping;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.Json;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
-
-    using PathFinder.Data.Common.Repositories;
-    using PathFinder.Data.Models;
-    using PathFinder.Services.Data;
-    using PathFinder.Services.Data.DTOs;
-    using PathFinder.Services.Data.Factories;
-    using PathFinder.Services.Mapping;
 
     public class ShipmentsService : IShipmentsService
     {
@@ -87,7 +87,14 @@
             var shipment = this.shipmentRepository
                 .AllAsNoTracking()
                 .Where(s => s.Id == shipmentId)
-                .To<Shipment>()
+                .Select(s => new Shipment
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Description = s.Description,
+                    StartNodeId = s.StartNodeId,
+                    EndNodeId = s.EndNodeId,
+                })
                 .FirstOrDefault();
 
             shipment.ShipmentConstraint = ConstraintFactory.BuildConstraintTree(
@@ -97,6 +104,37 @@
                 .ToList());
 
             return shipment;
+        }
+
+        public string GetShipmentConstraint(int shipmentId)
+        {
+            var constraints = this.constraintRepository.AllAsNoTracking()
+                .Where(c => c.ShipmentId == shipmentId)
+                .ToList();
+
+            if (constraints.Count == 0)
+            {
+                return null;
+            }
+
+            var constraintDtoById = constraints.ToDictionary(
+                c => c.Id,
+                c => new ConstraintDto { Value = c.Value, ConstraintType = c.ConstraintType });
+
+            var childrenByParentId = constraints
+                .Where(c => c.ParentId.HasValue)
+                .GroupBy(c => c.ParentId.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var root = constraints.Where(c => c.ParentId == null).ToList().Single(); ;
+
+            this.AddChildrenToDto(root.Id, constraintDtoById, childrenByParentId);
+
+            return JsonSerializer.Serialize(constraintDtoById[root.Id], new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter() },
+                WriteIndented = true,
+            });
         }
 
         public ShipmentDto GetShipmentData(int shipmentId)
@@ -146,6 +184,28 @@
             }
 
             return model;
+        }
+
+        private void AddChildrenToDto(
+            int parentId,
+            IDictionary<int, ConstraintDto> constraintById,
+            IDictionary<int, List<ShipmentConstraintModel>> childrenByParentId)
+        {
+            if (!childrenByParentId.TryGetValue(parentId, out var childModels))
+            {
+                return;
+            }
+
+            var parentConstraint = constraintById[parentId];
+
+            foreach (var childModel in childModels)
+            {
+                var childConstraint = constraintById[childModel.Id];
+
+                parentConstraint.Children.Add(childConstraint);
+
+                this.AddChildrenToDto(childModel.Id, constraintById, childrenByParentId);
+            }
         }
     }
 }

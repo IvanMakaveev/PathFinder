@@ -1,4 +1,4 @@
-const url = process.env.REACT_APP_API_URL + 'node/';
+const url = process.env.REACT_APP_API_URL + 'nodes/';
 
 export const getNodeDetails = (nodeId) => {
     return fetch(`${url}${nodeId}`)

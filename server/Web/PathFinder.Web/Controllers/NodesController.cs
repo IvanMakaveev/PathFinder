@@ -9,16 +9,16 @@
     using PathFinder.Web.ViewModels;
 
     [ApiController]
-    public class NodeController : ControllerBase
+    public class NodesController : ControllerBase
     {
         private readonly IGraphManagementService graphManagementService;
 
-        public NodeController(IGraphManagementService graphManagementService)
+        public NodesController(IGraphManagementService graphManagementService)
         {
             this.graphManagementService = graphManagementService;
         }
 
-        [HttpGet("/node/{id}")]
+        [HttpGet("/nodes/{id}")]
         public IActionResult GetNode(int id)
         {
             var node = this.graphManagementService.GetNodeById(id);
@@ -26,7 +26,7 @@
             return new JsonResult(node);
         }
 
-        [HttpGet("/node/{id}/modifiers")]
+        [HttpGet("/nodes/{id}/modifiers")]
         public IActionResult GetNodeModifiers(int id)
         {
             var nodeModifiers = this.graphManagementService.GetNodeModifiers(id);
@@ -34,7 +34,7 @@
             return new JsonResult(nodeModifiers);
         }
 
-        [HttpPut("/node/{id}")]
+        [HttpPut("/nodes/{id}")]
         public async Task<IActionResult> UpdateNode(int id, [FromBody] EditNodeInputModel input)
         {
             await this.graphManagementService.ChangeNodeTypeAsync(id, Enum.Parse<NodeType>(input.NodeType));
@@ -42,7 +42,7 @@
             return this.Ok();
         }
 
-        [HttpDelete("/node/{id}")]
+        [HttpDelete("/nodes/{id}")]
         public async Task<IActionResult> DeleteNode(int id)
         {
             try

@@ -14,7 +14,7 @@
         {
             if (constraints == null || constraints.Count == 0)
             {
-                throw new ArgumentException("Constraints collection cannot be null or empty.");
+                return null;
             }
 
             var constraintById = constraints.ToDictionary(c => c.Id, c => BuildConstraint(c));

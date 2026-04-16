@@ -1,0 +1,147 @@
+.shipment-page {
+  min-height: calc(100vh - 64px);
+  box-sizing: border-box;
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: 2.5fr 1.5fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.shipment-page__graph-shell {
+  width: 100%;
+  height: calc(100vh - 64px - 2.5rem);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.shipment-page__side-panel {
+  height: calc(100vh - 64px - 2.5rem);
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 1rem;
+  box-sizing: border-box;
+  text-align: left;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.shipment-page__title {
+  margin: 0 0 0.75rem 0;
+}
+
+.shipment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  flex: 1;
+}
+
+.shipment-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.shipment-form__field--grow {
+  flex: 1;
+}
+
+.shipment-form__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.shipment-form__input,
+.shipment-form__textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.shipment-form__input {
+  height: 38px;
+  padding: 0 0.75rem;
+}
+
+.shipment-form__textarea {
+  min-height: 120px;
+  max-height: 180px;
+  width: 100%;
+  resize: vertical;
+  padding: 0.65rem 0.75rem;
+  box-sizing: border-box;
+  font-family: Consolas, 'Courier New', monospace;
+}
+
+.shipment-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.25rem;
+}
+
+.shipment-form__actions--split {
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.shipment-form__button {
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.shipment-form__button:hover {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+}
+
+.shipment-form__button--danger {
+  border-color: #dc2626;
+  background: #dc2626;
+}
+
+.shipment-form__button--danger:hover {
+  border-color: #b91c1c;
+  background: #b91c1c;
+}
+
+.shipment-form__button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.shipment-form__path-result {
+  margin: 0;
+  color: #1f2937;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #eff6ff;
+}
+
+@media (max-width: 900px) {
+  .shipment-page {
+    grid-template-columns: 1fr;
+  }
+
+  .shipment-page__graph-shell,
+  .shipment-page__side-panel {
+    height: 50vh;
+  }
+}

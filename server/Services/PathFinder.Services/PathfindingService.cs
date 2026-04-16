@@ -31,29 +31,29 @@
             this.LoadGraph();
         }
 
-        public List<int> FindPath(int shipmentId)
+        public List<string> FindPath(int shipmentId)
         {
             var shipment = this.shipmentService.GetShipmentById(shipmentId);
 
             return this.GetShortestPath(shipment);
         }
 
-        private List<int> BuildPath(int startId, int endId, Dictionary<int, int> previous)
+        private List<string> BuildPath(int startId, int endId, Dictionary<int, int> previous)
         {
-            List<int> path = new List<int>();
+            List<string> path = new List<string>();
 
             while (endId != startId)
             {
-                path.Add(endId);
+                path.Add(this.nodes[endId].Name);
                 endId = previous[endId];
             }
 
-            path.Add(startId);
+            path.Add(this.nodes[startId].Name);
             path.Reverse();
             return path;
         }
 
-        private List<int> GetShortestPath(Shipment shipment)
+        private List<string> GetShortestPath(Shipment shipment)
         {
             Dictionary<int, long> dist = this.nodes.ToDictionary(n => n.Key, n => long.MaxValue);
             Dictionary<int, bool> visited = this.nodes.ToDictionary(n => n.Key, n => false);
@@ -93,7 +93,7 @@
                         var newContext = new PathFindingContext(edge.ToNodeId, newDistance, context.PathRisk);
                         this.nodes[edge.ToNodeId].ModifyContext(newContext);
 
-                        if (shipment.ShipmentConstraint.IsSatisfied(this.nodes[edge.ToNodeId], newContext))
+                        if (shipment.ShipmentConstraint == null || shipment.ShipmentConstraint.IsSatisfied(this.nodes[edge.ToNodeId], newContext))
                         {
                             dist[newContext.CurrentNodeId] = newContext.TotalPathLength;
                             previous[newContext.CurrentNodeId] = context.CurrentNodeId;

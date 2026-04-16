@@ -1,5 +1,5 @@
 .node-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 64px);
   box-sizing: border-box;
   padding: 1.25rem;
   display: grid;
@@ -10,7 +10,7 @@
 
 .node-page__graph-shell {
   width: 100%;
-  height: calc(100vh - 2.5rem);
+  height: calc(100vh - 64px - 2.5rem);
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #ffffff;
@@ -18,7 +18,7 @@
 }
 
 .node-page__side-panel {
-  height: calc(100vh - 2.5rem);
+  height: calc(100vh - 64px - 2.5rem);
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   background: #ffffff;
@@ -76,6 +76,21 @@
 .node-form__input[readonly] {
   background: #f9fafb;
   color: #6b7280;
+}
+
+.node-form__textarea {
+  min-height: 100px;
+  max-height: 160px;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+  box-sizing: border-box;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-family: Consolas, 'Courier New', monospace;
+  resize: vertical;
 }
 
 .node-form__header-row {

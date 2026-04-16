@@ -6,6 +6,7 @@ import HomePage from './components/HomePage';
 import ErrorPage from './components/ErrorPage';
 import NodePage from './components/NodePage';
 import EdgePage from './components/EdgePage';
+import ShipmentPage from './components/ShipmentPage';
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
                     <Header />
                     <Routes>
                         <Route path="/" element={<HomePage />} />
+                        <Route path="/shipment/:shipmentid" element={<ShipmentPage />} />
                         <Route path="/error" element={<ErrorPage />} />
                         <Route path="/node/:nodeid" element={<NodePage />} />
                         <Route path="/edge/:edgeid" element={<EdgePage />} />
