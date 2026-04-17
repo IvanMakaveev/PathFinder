@@ -76,5 +76,12 @@
             var constraint = this.shipmentsService.GetShipmentConstraint(id);
             return new JsonResult(constraint);
         }
+
+        [HttpPost("/shipments")]
+        public async Task<IActionResult> CreateShipment([FromBody] CreateShipmentInputModel model)
+        {
+            var shipmentId = await this.shipmentsService.CreateShipmentAsync(model.Name, model.Description, model.StartNodeId, model.EndNodeId);
+            return new JsonResult(shipmentId);
+        }
     }
 }

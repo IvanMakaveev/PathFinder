@@ -14,7 +14,7 @@
 
         Shipment GetShipmentById(int shipmentId);
 
-        Task<int> CreateShipmentAsync(string name, string description, int fromId, int toId);
+        Task<int> CreateShipmentAsync(string name, string description, int startNodeId, int endNodeId);
 
         Task<int> AddConstraint(int shipmentId, string constraintData);
 

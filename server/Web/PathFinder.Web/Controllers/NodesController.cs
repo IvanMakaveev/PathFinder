@@ -1,6 +1,7 @@
 ﻿namespace PathFinder.Web.Controllers
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@
             this.graphManagementService = graphManagementService;
         }
 
-        [HttpGet("/nodes/{id}")]
+        [HttpGet("/nodes/{id:int}")]
         public IActionResult GetNode(int id)
         {
             var node = this.graphManagementService.GetNodeById(id);
@@ -26,7 +27,7 @@
             return new JsonResult(node);
         }
 
-        [HttpGet("/nodes/{id}/modifiers")]
+        [HttpGet("/nodes/{id:int}/modifiers")]
         public IActionResult GetNodeModifiers(int id)
         {
             var nodeModifiers = this.graphManagementService.GetNodeModifiers(id);
@@ -34,7 +35,7 @@
             return new JsonResult(nodeModifiers);
         }
 
-        [HttpPut("/nodes/{id}")]
+        [HttpPut("/nodes/{id:int}")]
         public async Task<IActionResult> UpdateNode(int id, [FromBody] EditNodeInputModel input)
         {
             await this.graphManagementService.ChangeNodeTypeAsync(id, Enum.Parse<NodeType>(input.NodeType));
@@ -42,7 +43,7 @@
             return this.Ok();
         }
 
-        [HttpDelete("/nodes/{id}")]
+        [HttpDelete("/nodes/{id:int}")]
         public async Task<IActionResult> DeleteNode(int id)
         {
             try
@@ -54,6 +55,38 @@
             {
                 return this.BadRequest();
             }
+        }
+
+        [HttpPost("/nodes")]
+        public async Task<IActionResult> CreateNode([FromBody] CreateNodeInputModel input)
+        {
+            var nodeId = await this.graphManagementService.CreateNodeAsync(input.Name, Enum.Parse<NodeType>(input.NodeType));
+            return new JsonResult(nodeId);
+        }
+
+        [HttpPost("/nodes/{id:int}/modifiers")]
+        public async Task<IActionResult> AddNodeModifier(int id, [FromBody] CreateNodeModifierInputModel input)
+        {
+            try
+            {
+                var modifierId = await this.graphManagementService.AddModifierToNodeAsync(id, Enum.Parse<NodeModifierType>(input.ModifierType), input.Value);
+                return new JsonResult(modifierId);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+            catch (KeyNotFoundException)
+            {
+                return this.NotFound();
+            }
+        }
+
+        [HttpDelete("/nodes/modifiers/{id:int}")]
+        public async Task<IActionResult> DeleteNodeModifier(int id)
+        {
+            await this.graphManagementService.RemoveModifierFromNodeAsync(id);
+            return this.Ok();
         }
     }
 }

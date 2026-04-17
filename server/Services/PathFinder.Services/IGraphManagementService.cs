@@ -12,7 +12,7 @@
 
         NodeDto GetNodeById(int nodeId);
 
-        EdgeDto GetEdge(int edgeId);
+        EdgeDto GetEdgeById(int edgeId);
 
         IList<NodeModifierDto> GetNodeModifiers(int nodeId);
 
@@ -30,6 +30,6 @@
 
         Task ChangeNodeTypeAsync(int nodeId, NodeType nodeType);
 
-        Task ChangeNodeModifierAsync(int modifierId, NodeModifierType modifierType, int value);
+        Task ChangeEdgeLengthAsync(int edgeId, int length);
     }
 }

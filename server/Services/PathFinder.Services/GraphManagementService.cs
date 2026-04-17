@@ -1,15 +1,16 @@
 ﻿namespace PathFinder.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
     using PathFinder.Data.Common.Repositories;
     using PathFinder.Data.Models;
     using PathFinder.Data.Models.Enums;
+    using PathFinder.Services.Data;
     using PathFinder.Services.Data.DTOs;
     using PathFinder.Services.Mapping;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     public class GraphManagementService : IGraphManagementService
     {
@@ -29,6 +30,16 @@
 
         public async Task<int> AddModifierToNodeAsync(int nodeId, NodeModifierType modifierType, int value)
         {
+            if (!this.nodesRepository.AllAsNoTracking().Any(n => n.Id == nodeId))
+            {
+                throw new KeyNotFoundException($"Node with ID {nodeId} not found.");
+            }
+
+            if (this.nodeModifiersRepository.AllAsNoTracking().Any(n => n.ModifierType == modifierType))
+            {
+                throw new InvalidOperationException($"A modifier of type {modifierType} already exists for this node.");
+            }
+
             var modifier = new NodeModifierModel
             {
                 NodeId = nodeId,
@@ -42,18 +53,17 @@
             return modifier.Id;
         }
 
-        public async Task ChangeNodeModifierAsync(int modifierId, NodeModifierType modifierType, int value)
+        public async Task ChangeEdgeLengthAsync(int edgeId, int length)
         {
-            var modifier = this.nodeModifiersRepository.All().FirstOrDefault(m => m.Id == modifierId);
+            var edge = this.edgesRepository.All().FirstOrDefault(n => n.Id == edgeId);
 
-            if (modifier == null)
+            if (edge == null)
             {
-                throw new KeyNotFoundException($"Modifier with ID {modifierId} not found.");
+                throw new KeyNotFoundException($"Edge with ID {edgeId} not found.");
             }
 
-            modifier.ModifierType = modifierType;
-            modifier.ModifierValue = value;
-            await this.nodeModifiersRepository.SaveChangesAsync();
+            edge.Length = length;
+            await this.edgesRepository.SaveChangesAsync();
         }
 
         public async Task ChangeNodeTypeAsync(int nodeId, NodeType nodeType)
@@ -71,6 +81,21 @@
 
         public async Task<int> CreateEdgeAsync(int fromNodeId, int toNodeId, int length)
         {
+            if (!this.nodesRepository.AllAsNoTracking().Any(n => n.Id == fromNodeId))
+            {
+                throw new KeyNotFoundException($"From node with ID {fromNodeId} not found.");
+            }
+
+            if (!this.nodesRepository.AllAsNoTracking().Any(n => n.Id == toNodeId))
+            {
+                throw new KeyNotFoundException($"To node with ID {toNodeId} not found.");
+            }
+
+            if (this.edgesRepository.AllAsNoTracking().Any(e => e.FromNodeId == fromNodeId && e.ToNodeId == toNodeId))
+            {
+                throw new InvalidOperationException($"An edge from node {fromNodeId} to node {toNodeId} already exists.");
+            }
+
             var edge = new EdgeModel
             {
                 FromNodeId = fromNodeId,
@@ -98,7 +123,7 @@
             return node.Id;
         }
 
-        public EdgeDto GetEdge(int edgeId)
+        public EdgeDto GetEdgeById(int edgeId)
             => this.edgesRepository.AllAsNoTracking()
                 .Where(e => e.Id == edgeId)
                 .To<EdgeDto>()

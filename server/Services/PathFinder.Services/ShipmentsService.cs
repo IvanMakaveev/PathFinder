@@ -66,14 +66,14 @@
             return rootModel.Id;
         }
 
-        public async Task<int> CreateShipmentAsync(string name, string description, int fromId, int toId)
+        public async Task<int> CreateShipmentAsync(string name, string description, int startNodeId, int endNodeId)
         {
             var shipment = new ShipmentModel
             {
                 Name = name,
                 Description = description,
-                StartNodeId = fromId,
-                EndNodeId = toId,
+                StartNodeId = startNodeId,
+                EndNodeId = endNodeId,
             };
 
             await this.shipmentRepository.AddAsync(shipment);
