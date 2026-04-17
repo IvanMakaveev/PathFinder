@@ -88,7 +88,7 @@
 
                     var newDistance = context.TotalPathLength + edge.Length;
 
-                    if (dist[edge.ToNodeId] > newDistance)
+                    if (dist[edge.ToNodeId] >= newDistance)
                     {
                         var newContext = new PathFindingContext(edge.ToNodeId, newDistance, context.PathRisk);
                         this.nodes[edge.ToNodeId].ModifyContext(newContext);
@@ -120,6 +120,14 @@
                 .To<Edge>()
                 .GroupBy(e => e.FromNodeId)
                 .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var nodeId in this.nodes.Keys)
+            {
+                if (!this.adjacencyList.ContainsKey(nodeId))
+                {
+                    this.adjacencyList[nodeId] = new List<Edge>();
+                }
+            }
         }
     }
 }
