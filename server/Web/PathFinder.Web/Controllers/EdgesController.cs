@@ -24,8 +24,17 @@
         public IActionResult GetEdge(int id)
         {
             var edge = this.graphManagementService.GetEdgeById(id);
+            var edgeViewModel = new EdgeViewModel
+            {
+                Id = edge.Id,
+                FromNodeId = edge.FromNodeId,
+                FromNodeName = this.graphManagementService.GetNodeById(edge.FromNodeId)?.Name,
+                ToNodeId = edge.ToNodeId,
+                ToNodeName = this.graphManagementService.GetNodeById(edge.ToNodeId)?.Name,
+                Length = edge.Length,
+            };
 
-            return new JsonResult(edge);
+            return new JsonResult(edgeViewModel);
         }
 
         [HttpPut("/edges/{id:int}")]

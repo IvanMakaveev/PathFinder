@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Graph from '../Graph';
 import * as nodeService from '../../services/nodeService';
 import './NodePage.css';
@@ -75,6 +75,7 @@ const normalizeNodeData = (detailsData, modifiersData, fallbackId) => {
 
 const NodePage = () => {
     const { nodeid } = useParams();
+    const navigate = useNavigate();
     const [graphRefreshKey, setGraphRefreshKey] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -185,6 +186,7 @@ const NodePage = () => {
                 }
 
                 setSaveMessage('Node deleted.');
+                navigate('/');
             })
             .catch(() => {
                 setSaveMessage('Unable to delete node.');

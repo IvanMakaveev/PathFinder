@@ -13,11 +13,13 @@
     public class ShipmentsController : ControllerBase
     {
         private readonly IShipmentsService shipmentsService;
+        private readonly IGraphManagementService graphManagementService;
         private readonly IPathfindingService pathfindingService;
 
-        public ShipmentsController(IShipmentsService shipmentsService, IPathfindingService pathfindingService)
+        public ShipmentsController(IShipmentsService shipmentsService, IGraphManagementService graphManagementService, IPathfindingService pathfindingService)
         {
             this.shipmentsService = shipmentsService;
+            this.graphManagementService = graphManagementService;
             this.pathfindingService = pathfindingService;
         }
 
@@ -34,7 +36,18 @@
         {
             var shipment = this.shipmentsService.GetShipmentData(id);
 
-            return new JsonResult(shipment);
+            var shipmentViewModel = new ShipmentViewModel
+            {
+                Id = shipment.Id,
+                Name = shipment.Name,
+                Description = shipment.Description,
+                StartNodeId = shipment.StartNodeId,
+                StartNodeName = this.graphManagementService.GetNodeById(shipment.StartNodeId)?.Name,
+                EndNodeId = shipment.EndNodeId,
+                EndNodeName = this.graphManagementService.GetNodeById(shipment.EndNodeId)?.Name,
+            };
+
+            return new JsonResult(shipmentViewModel);
         }
 
         [HttpGet("/shipments/{id}/path")]

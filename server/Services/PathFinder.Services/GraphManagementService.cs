@@ -123,6 +123,9 @@
             return node.Id;
         }
 
+        public IList<NodeDto> GetAllNodes()
+            => this.nodesRepository.AllAsNoTracking().To<NodeDto>().ToList();
+
         public EdgeDto GetEdgeById(int edgeId)
             => this.edgesRepository.AllAsNoTracking()
                 .Where(e => e.Id == edgeId)

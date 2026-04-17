@@ -1,14 +1,25 @@
 const url = process.env.REACT_APP_API_URL + 'nodes/';
 
+export const getAllNodes = () => {
+    return fetch(url)
+        .then((res) => {
+            if (res.ok == true) {
+                return res.json();
+            }
+            return undefined;
+        })
+        .catch((res) => {
+            console.log(res);
+        });
+};
+
 export const getNodeDetails = (nodeId) => {
     return fetch(`${url}${nodeId}`)
         .then((res) => {
             if (res.ok == true) {
                 return res.json();
             }
-            else {
-                return undefined;
-            }
+            return undefined;
         })
         .catch((res) => {
             console.log(res);
@@ -21,9 +32,7 @@ export const getNodeModifiers = (nodeId) => {
             if (res.ok == true) {
                 return res.json();
             }
-            else {
-                return undefined;
-            }
+            return undefined;
         })
         .catch((res) => {
             console.log(res);
@@ -42,9 +51,7 @@ export const editNodeType = (nodeId, nodeType) => {
             if (res.ok == true) {
                 return true;
             }
-            else {
-                return undefined;
-            }
+            return undefined;
         })
         .catch((res) => {
             console.log(res);
@@ -59,9 +66,28 @@ export const deleteNode = (nodeId) => {
             if (res.ok == true) {
                 return true;
             }
-            else {
-                return undefined;
+            return undefined;
+        })
+        .catch((res) => {
+            console.log(res);
+        });
+};
+
+export const createNode = (nodeData) => {
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nodeData),
+    })
+        .then(async (res) => {
+            if (res.ok == true) {
+                return { ok: true };
             }
+
+            const errorData = await res.json().catch(() => undefined);
+            return { ok: false, errorData };
         })
         .catch((res) => {
             console.log(res);

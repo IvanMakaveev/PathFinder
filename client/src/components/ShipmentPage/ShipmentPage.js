@@ -15,8 +15,8 @@ const ShipmentPage = () => {
         id: '',
         name: '',
         description: '',
-        startNodeId: '',
-        endNodeId: '',
+        startNodeName: '',
+        endNodeName: '',
         constraintJson: '',
     });
 
@@ -41,8 +41,8 @@ const ShipmentPage = () => {
                         id: shipmentid,
                         name: '',
                         description: '',
-                        startNodeId: '',
-                        endNodeId: '',
+                        startNodeName: '',
+                        endNodeName: '',
                         constraintJson: constraint ?? '',
                     });
                     return;
@@ -52,8 +52,8 @@ const ShipmentPage = () => {
                     id: details.id ?? shipmentid,
                     name: details.name ?? '',
                     description: details.description ?? '',
-                    startNodeId: details.startNodeId ?? '',
-                    endNodeId: details.endNodeId ?? '',
+                    startNodeName: details.startNodeName ?? '',
+                    endNodeName: details.endNodeName ?? '',
                     constraintJson: constraint ?? '',
                 });
             })
@@ -165,21 +165,21 @@ const ShipmentPage = () => {
                     </label>
 
                     <label className="shipment-form__field">
-                        <span className="shipment-form__label">Start ID</span>
+                        <span className="shipment-form__label">Start Node</span>
                         <input
                             type="text"
                             className="shipment-form__input"
-                            value={shipmentData.startNodeId}
+                            value={shipmentData.startNodeName}
                             readOnly
                         />
                     </label>
 
                     <label className="shipment-form__field">
-                        <span className="shipment-form__label">End ID</span>
+                        <span className="shipment-form__label">End Node</span>
                         <input
                             type="text"
                             className="shipment-form__input"
-                            value={shipmentData.endNodeId}
+                            value={shipmentData.endNodeName}
                             readOnly
                         />
                     </label>

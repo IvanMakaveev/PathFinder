@@ -10,6 +10,8 @@
     {
         GraphDto GetGraph();
 
+        IList<NodeDto> GetAllNodes();
+
         NodeDto GetNodeById(int nodeId);
 
         EdgeDto GetEdgeById(int edgeId);

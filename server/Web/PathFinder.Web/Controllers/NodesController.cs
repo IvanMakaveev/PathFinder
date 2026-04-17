@@ -19,6 +19,14 @@
             this.graphManagementService = graphManagementService;
         }
 
+        [HttpGet("/nodes")]
+        public IActionResult GetNodes()
+        {
+            var nodes = this.graphManagementService.GetAllNodes();
+
+            return new JsonResult(nodes);
+        }
+
         [HttpGet("/nodes/{id:int}")]
         public IActionResult GetNode(int id)
         {
