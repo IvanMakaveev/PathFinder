@@ -19,9 +19,15 @@ The high-level architecture defines four distinct layers:
 - **Services** - contain the primary business logic of the application, and handle data access via the Data layer.
 - **Data** - establish the data models, seed initial data examples and provide access via **Repository Pattern**.
 
-The **Service** layer implements two polymorphic hierarchies - Nodes and Constraints. This allows the pathfinding algorithm to work without any knowledge of the underlying implementations for the different types of nodes and constraints. Additionally, the use of **Factory Pattern** decouples any of the services from the two hierarchies and enables a quick and easy way to extend them without changing the logic of the pathfinding algorithm.
+The **Service** layer implements two polymorphic hierarchies - Nodes and Constraints. This allows the pathfinding algorithm to work without any knowledge of the underlying implementations for the different types of nodes and constraints.
 
-Another architectural choice is the use of **Composite Pattern** for the Constraints, allowing the creation of more complex types of restrictions with the help of "And" and "Or" constraints, which combine multiple sub-constraints into one and require either all constraints or at least one constraint to be satisfied.
+The base `abstract class Node` exposes an abstract method that recieves `PathFindingContext` which can be modified to influence the pathfinding algorithm.
+
+The base `abstract class ShipmentConstraint` exposes an abstract method `IsSatisfied` that recieves the current `PathFindingContext` and `Node` element and returns if that constraint is satisfied or not.
+
+Additionally, the use of **Factory Pattern** decouples any of the services from the two hierarchies and enables a quick and easy way to extend them without changing the logic of the pathfinding algorithm.
+
+Another architectural choice is the use of **Composite Pattern** for the Constraints, allowing the creation of more complex types of restrictions with the help of "And" and "Or" constraints, which combine multiple sub-constraints into one and require either all constraints or at least one constraint to be satisfied. Their `IsSatisfied` method recursively calls the sub-constraints' methods without any knowledge of their concrete types, making use of the polymorphic hierarchy and composite structure.
 
 ## Guide:
 The app's home page loads the stored graph and displays it with the help of the ReactFlow library. Nodes are colored based on their type:
