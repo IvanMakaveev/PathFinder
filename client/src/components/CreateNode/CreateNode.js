@@ -16,12 +16,19 @@ const CreateNode = () => {
     });
 
     const handleCreate = () => {
+        const trimmedName = formData.name.trim();
+
+        if (!trimmedName) {
+            setErrorMessage('Name is required.');
+            return;
+        }
+
         setIsSubmitting(true);
         setErrorMessage('');
 
         nodeService
             .createNode({
-                name: formData.name,
+                name: trimmedName,
                 nodeType: formData.nodeType,
             })
             .then((res) => {
@@ -61,6 +68,7 @@ const CreateNode = () => {
                             type="text"
                             className="create-node-form__input"
                             value={formData.name}
+                            required
                             onChange={(event) =>
                                 setFormData((prev) => ({ ...prev, name: event.target.value }))
                             }
