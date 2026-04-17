@@ -21,6 +21,14 @@
             {
                 Name = "Node 7",
                 NodeType = NodeType.NormalNode,
+                Modifiers = new List<NodeModifierModel>
+                {
+                    new NodeModifierModel
+                    {
+                        ModifierType = NodeModifierType.CoolantNode,
+                        ModifierValue = -10,
+                    },
+                },
             };
 
             var node5 = new NodeModel
@@ -33,6 +41,14 @@
                     {
                         ToNode = node7,
                         Length = 2,
+                    },
+                },
+                Modifiers = new List<NodeModifierModel>
+                {
+                    new NodeModifierModel
+                    {
+                        ModifierType = NodeModifierType.CoolantNode,
+                        ModifierValue = -5,
                     },
                 },
             };
@@ -54,6 +70,14 @@
                         Length = 7,
                     },
                 },
+                Modifiers = new List<NodeModifierModel>
+                {
+                    new NodeModifierModel
+                    {
+                        ModifierType = NodeModifierType.CoolantNode,
+                        ModifierValue = -10,
+                    },
+                },
             };
 
             var node4 = new NodeModel
@@ -66,6 +90,14 @@
                     {
                         ToNode = node6,
                         Length = 2,
+                    },
+                },
+                Modifiers = new List<NodeModifierModel>
+                {
+                    new NodeModifierModel
+                    {
+                        ModifierType = NodeModifierType.CoolantNode,
+                        ModifierValue = -10,
                     },
                 },
             };
@@ -85,6 +117,14 @@
                     {
                         ToNode = node5,
                         Length = 1,
+                    },
+                },
+                Modifiers = new List<NodeModifierModel>
+                {
+                    new NodeModifierModel
+                    {
+                        ModifierType = NodeModifierType.CoolantNode,
+                        ModifierValue = -10,
                     },
                 },
             };
@@ -125,9 +165,73 @@
                         Length = 10,
                     },
                 },
+                Modifiers = new List<NodeModifierModel>
+                {
+                    new NodeModifierModel
+                    {
+                        ModifierType = NodeModifierType.CoolantNode,
+                        ModifierValue = -10,
+                    },
+                },
             };
 
             await dbContext.Nodes.AddAsync(node1);
+            await dbContext.SaveChangesAsync();
+
+            var shipment1 = new ShipmentModel
+            {
+                Name = "Simple Shipment",
+                Description = "Just Dijkstra's algorithm",
+                StartNodeId = node1.Id,
+                EndNodeId = node7.Id,
+            };
+
+            var shipment2 = new ShipmentModel
+            {
+                Name = "Risk Shipment",
+                Description = "Risk = Max number of broken nodes",
+                StartNodeId = node1.Id,
+                EndNodeId = node7.Id,
+                ShipmentConstraints = new List<ShipmentConstraintModel>
+                {
+                    new ShipmentConstraintModel
+                    {
+                        ConstraintType = ConstraintType.MaxRisk,
+                        Value = 1,
+                    },
+                },
+            };
+
+            var andConstraint = new ShipmentConstraintModel
+            {
+                ConstraintType = ConstraintType.And,
+            };
+
+            var shipment3 = new ShipmentModel
+            {
+                Name = "Complex Shipment",
+                Description = "Both constraints must be fulfilled",
+                StartNodeId = node1.Id,
+                EndNodeId = node7.Id,
+                ShipmentConstraints = new List<ShipmentConstraintModel>
+                {
+                    andConstraint,
+                    new ShipmentConstraintModel
+                    {
+                        ConstraintType = ConstraintType.MaxRisk,
+                        Value = 1,
+                        Parent = andConstraint,
+                    },
+                    new ShipmentConstraintModel
+                    {
+                        ConstraintType = ConstraintType.RequireCooling,
+                        Value = -5,
+                        Parent = andConstraint,
+                    },
+                },
+            };
+
+            await dbContext.Shipments.AddRangeAsync(shipment1, shipment2, shipment3);
         }
     }
 }
