@@ -1,13 +1,14 @@
 ﻿namespace PathFinder.Web.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
     using PathFinder.Data.Models.Enums;
     using PathFinder.Services;
     using PathFinder.Web.ViewModels;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     [ApiController]
     public class EdgesController : ControllerBase
@@ -30,45 +31,51 @@
         [HttpPut("/edges/{id:int}")]
         public async Task<IActionResult> UpdateEdgeLength(int id, [FromBody] EditEdgeInputModel input)
         {
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.ModelState);
+            }
+
             try
             {
                 await this.graphManagementService.ChangeEdgeLengthAsync(id, input.Length);
                 return this.Ok();
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ke)
             {
-                return this.NotFound();
+                this.ModelState.AddModelError("edge", ke.Message);
+                return this.NotFound(this.ModelState);
             }
         }
 
         [HttpDelete("/edges/{id:int}")]
         public async Task<IActionResult> DeleteEdge(int id)
         {
-            try
-            {
-                await this.graphManagementService.RemoveEdgeAsync(id);
-                return this.Ok();
-            }
-            catch (InvalidOperationException)
-            {
-                return this.BadRequest();
-            }
+            await this.graphManagementService.RemoveEdgeAsync(id);
+            return this.Ok();
         }
 
         [HttpPost("/edges")]
         public async Task<IActionResult> CreateEdge([FromBody] CreateEdgeInputModel input)
         {
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.ModelState);
+            }
+
             try
             {
                 var edgeId = await this.graphManagementService.CreateEdgeAsync(input.FromNodeId, input.ToNodeId, input.Length);
                 return new JsonResult(edgeId);
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ie)
             {
-                return this.BadRequest();
+                this.ModelState.AddModelError("edge", ie.Message);
+                return this.BadRequest(this.ModelState);
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException ke)
             {
+                this.ModelState.AddModelError("nodes", ke.Message);
                 return this.NotFound();
             }
         }

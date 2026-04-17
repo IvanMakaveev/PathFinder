@@ -53,13 +53,15 @@
                 await this.shipmentsService.AddConstraint(id, input);
                 return this.Ok();
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException ae)
             {
-                return this.BadRequest(ex.Message);
+                this.ModelState.AddModelError("shipment", ae.Message);
+                return this.BadRequest(this.ModelState);
             }
-            catch (KeyNotFoundException ex)
+            catch (KeyNotFoundException ke)
             {
-                return this.NotFound(ex.Message);
+                this.ModelState.AddModelError("shipment", ke.Message);
+                return this.NotFound(this.ModelState);
             }
         }
 
@@ -80,6 +82,11 @@
         [HttpPost("/shipments")]
         public async Task<IActionResult> CreateShipment([FromBody] CreateShipmentInputModel model)
         {
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.ModelState);
+            }
+
             var shipmentId = await this.shipmentsService.CreateShipmentAsync(model.Name, model.Description, model.StartNodeId, model.EndNodeId);
             return new JsonResult(shipmentId);
         }
