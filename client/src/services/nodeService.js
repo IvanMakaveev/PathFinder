@@ -39,6 +39,46 @@ export const getNodeModifiers = (nodeId) => {
         });
 };
 
+export const addNodeModifier = (nodeId, modifierType, value) => {
+    return fetch(`${url}${nodeId}/modifiers`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            ModifierType: modifierType,
+            Value: value,
+        }),
+    })
+        .then(async (res) => {
+            if (res.ok == true) {
+                const json = await res.json().catch(() => undefined);
+                return { ok: true, data: json };
+            }
+
+            const errorData = await res.json().catch(() => undefined);
+            return { ok: false, errorData };
+        })
+        .catch((res) => {
+            console.log(res);
+        });
+};
+
+export const deleteNodeModifier = (modifierId) => {
+    return fetch(`${url}modifiers/${modifierId}`, {
+        method: 'DELETE',
+    })
+        .then((res) => {
+            if (res.ok == true) {
+                return true;
+            }
+            return undefined;
+        })
+        .catch((res) => {
+            console.log(res);
+        });
+};
+
 export const editNodeType = (nodeId, nodeType) => {
     return fetch(`${url}${nodeId}`, {
         method: 'PUT',

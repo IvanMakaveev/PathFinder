@@ -7,7 +7,6 @@
         [Required]
         public string ModifierType { get; set; }
 
-        [Required]
-        public int Value { get; set; }
+        public int Value { get; set; } = 0;
     }
 }

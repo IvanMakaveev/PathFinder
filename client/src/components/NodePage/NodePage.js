@@ -7,11 +7,6 @@ import './NodePage.css';
 const NODE_TYPE_OPTIONS = ['NormalNode', 'BrokenNode'];
 const ATTRIBUTE_KEY_OPTIONS = ['CoolantNode', 'SpecializedNode'];
 
-const createEmptyPair = () => ({
-    key: ATTRIBUTE_KEY_OPTIONS[0],
-    value: '',
-});
-
 const normalizeModifierType = (rawType) => {
     if (rawType === 0 || rawType === '0') {
         return 'CoolantNode';
@@ -47,12 +42,14 @@ const normalizeTypeValue = (rawType) => {
 const normalizeModifiers = (modifiersData) => {
     if (Array.isArray(modifiersData)) {
         return modifiersData.map((item) => {
+            const modifierId = item?.id ?? item?.Id;
             const key = item?.modifierType;
             const value = item?.modifierValue;
 
             return {
+                id: modifierId,
                 key: normalizeModifierType(key),
-                value: Number.isFinite(Number(value)) && Number(value) > 0 ? String(value) : '',
+                value: Number.isFinite(Number(value)) ? String(Number(value)) : '0',
             };
         });
     }
@@ -80,8 +77,14 @@ const NodePage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isAddingModifier, setIsAddingModifier] = useState(false);
+    const [modifierToDeleteId, setModifierToDeleteId] = useState(null);
     const [loadError, setLoadError] = useState('');
     const [saveMessage, setSaveMessage] = useState('');
+    const [newModifier, setNewModifier] = useState({
+        key: ATTRIBUTE_KEY_OPTIONS[0],
+        value: '0',
+    });
     const [nodeDetails, setNodeDetails] = useState(() =>
         normalizeNodeData({ id: nodeid }, [], nodeid)
     );
@@ -129,29 +132,6 @@ const NodePage = () => {
         };
     }, [nodeid]);
 
-    const updateAttribute = (index, field, value) => {
-        setNodeDetails((prev) => ({
-            ...prev,
-            attributes: prev.attributes.map((pair, pairIndex) =>
-                pairIndex === index ? { ...pair, [field]: value } : pair
-            ),
-        }));
-    };
-
-    const addAttribute = () => {
-        setNodeDetails((prev) => ({
-            ...prev,
-            attributes: [...prev.attributes, createEmptyPair()],
-        }));
-    };
-
-    const removeAttribute = (index) => {
-        setNodeDetails((prev) => ({
-            ...prev,
-            attributes: prev.attributes.filter((_, pairIndex) => pairIndex !== index),
-        }));
-    };
-
     const handleEditClick = () => {
         setIsSaving(true);
         setSaveMessage('');
@@ -196,6 +176,107 @@ const NodePage = () => {
             });
     };
 
+    const reloadModifiers = () => {
+        return nodeService.getNodeModifiers(nodeid)
+            .then((modifiersData) => {
+                if (modifiersData == undefined) {
+                    return false;
+                }
+
+                setNodeDetails((prev) => ({
+                    ...prev,
+                    attributes: normalizeModifiers(modifiersData),
+                }));
+
+                return true;
+            })
+            .catch(() => false);
+    };
+
+    const handleAddModifierClick = () => {
+        const numericValue = Number(newModifier.value);
+        if (!Number.isInteger(numericValue)) {
+            setSaveMessage('Modifier value must be an integer');
+            return;
+        }
+
+        setIsAddingModifier(true);
+        setSaveMessage('');
+
+        nodeService.addNodeModifier(nodeDetails.id, newModifier.key, numericValue)
+            .then(async (res) => {
+                if (res?.ok !== true) {
+                    const values = Object.values(res?.errorData ?? {});
+                    const message = values.flatMap((value) =>
+                        Array.isArray(value) ? value : [String(value)]
+                    ).join(' ');
+                    setSaveMessage(message || 'Unable to add modifier.');
+                    return;
+                }
+
+                const reloaded = await reloadModifiers();
+
+                if (!reloaded) {
+                    const created = res?.data;
+                    const createdId = created?.id ?? created?.Id;
+                    const createdType = created?.modifierType ?? created?.ModifierType ?? newModifier.key;
+                    const createdValue = created?.modifierValue ?? created?.Value ?? numericValue;
+
+                    if (createdId != undefined) {
+                        setNodeDetails((prev) => ({
+                            ...prev,
+                            attributes: [
+                                ...prev.attributes,
+                                {
+                                    id: createdId,
+                                    key: normalizeModifierType(createdType),
+                                    value: String(Number(createdValue) || 0),
+                                },
+                            ],
+                        }));
+                    }
+                }
+
+                setNewModifier((prev) => ({ ...prev, value: '0' }));
+                setSaveMessage('Modifier added.');
+            })
+            .catch(() => {
+                setSaveMessage('Unable to add modifier.');
+            })
+            .finally(() => {
+                setIsAddingModifier(false);
+            });
+    };
+
+    const handleDeleteModifierClick = (modifierId) => {
+        setModifierToDeleteId(modifierId);
+        setSaveMessage('');
+
+        nodeService.deleteNodeModifier(modifierId)
+            .then(async (res) => {
+                if (res == undefined) {
+                    setSaveMessage('Unable to delete modifier.');
+                    return;
+                }
+
+                const reloaded = await reloadModifiers();
+                if (!reloaded) {
+                    setNodeDetails((prev) => ({
+                        ...prev,
+                        attributes: prev.attributes.filter((pair) => String(pair.id) !== String(modifierId)),
+                    }));
+                }
+
+                setSaveMessage('Modifier deleted.');
+            })
+            .catch(() => {
+                setSaveMessage('Unable to delete modifier.');
+            })
+            .finally(() => {
+                setModifierToDeleteId(null);
+            });
+    };
+
     return (
         <section className="node-page">
             <div className="node-page__graph-shell">
@@ -237,69 +318,12 @@ const NodePage = () => {
                             </select>
                         </label>
 
-                        <div className="node-form__field">
-                            <div className="node-form__header-row">
-                                <span className="node-form__label">Key/Value Pairs</span>
-                                <button
-                                    type="button"
-                                    className="node-form__small-button"
-                                    onClick={addAttribute}
-                                >
-                                    Add Pair
-                                </button>
-                            </div>
-
-                            {nodeDetails.attributes.length === 0 && (
-                                <p className="node-form__hint">No pairs configured.</p>
-                            )}
-
-                            <div className="node-form__pairs">
-                                {nodeDetails.attributes.map((pair, index) => (
-                                    <div className="node-form__pair" key={`${pair.key}-${index}`}>
-                                        <select
-                                            className="node-form__input"
-                                            value={pair.key}
-                                            onChange={(event) =>
-                                                updateAttribute(index, 'key', event.target.value)
-                                            }
-                                        >
-                                            {ATTRIBUTE_KEY_OPTIONS.map((option) => (
-                                                <option key={option} value={option}>
-                                                    {option}
-                                                </option>
-                                            ))}
-                                        </select>
-
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            step="1"
-                                            className="node-form__input"
-                                            value={pair.value}
-                                            onChange={(event) =>
-                                                updateAttribute(index, 'value', event.target.value)
-                                            }
-                                            placeholder="Positive integer"
-                                        />
-
-                                        <button
-                                            type="button"
-                                            className="node-form__small-button node-form__small-button--danger"
-                                            onClick={() => removeAttribute(index)}
-                                        >
-                                            Remove
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="node-form__actions">
+                        <div className="node-form__actions node-form__actions--top">
                             <button
                                 type="button"
                                 className="node-form__submit-button"
                                 onClick={handleEditClick}
-                                disabled={isSaving || isDeleting}
+                                disabled={isSaving || isDeleting || isAddingModifier || modifierToDeleteId != null}
                             >
                                 {isSaving ? 'Saving...' : 'Edit'}
                             </button>
@@ -307,10 +331,88 @@ const NodePage = () => {
                                 type="button"
                                 className="node-form__submit-button node-form__submit-button--danger"
                                 onClick={handleDeleteClick}
-                                disabled={isSaving || isDeleting}
+                                disabled={isSaving || isDeleting || isAddingModifier || modifierToDeleteId != null}
                             >
                                 {isDeleting ? 'Deleting...' : 'Delete'}
                             </button>
+                        </div>
+
+                        <div className="node-form__field">
+                            <div className="node-form__header-row">
+                                <span className="node-form__label">Modifiers</span>
+                            </div>
+
+                            <div className="node-form__pair node-form__pair--adder">
+                                <select
+                                    className="node-form__input"
+                                    value={newModifier.key}
+                                    onChange={(event) =>
+                                        setNewModifier((prev) => ({ ...prev, key: event.target.value }))
+                                    }
+                                >
+                                    {ATTRIBUTE_KEY_OPTIONS.map((option) => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <input
+                                    type="number"
+                                    step="1"
+                                    className="node-form__input"
+                                    value={newModifier.value}
+                                    onChange={(event) =>
+                                        setNewModifier((prev) => ({ ...prev, value: event.target.value }))
+                                    }
+                                    placeholder="Integer"
+                                />
+
+                                <button
+                                    type="button"
+                                    className="node-form__small-button"
+                                    onClick={handleAddModifierClick}
+                                    disabled={isAddingModifier || isSaving || isDeleting || modifierToDeleteId != null}
+                                >
+                                    {isAddingModifier ? 'Adding...' : 'Add'}
+                                </button>
+                            </div>
+
+                            {nodeDetails.attributes.length === 0 && (
+                                <p className="node-form__hint">No modifiers configured.</p>
+                            )}
+
+                            <div className="node-form__pairs">
+                                {nodeDetails.attributes.map((pair, index) => (
+                                    <div className="node-form__pair" key={`${pair.id ?? 'modifier'}-${pair.key}-${index}`}>
+                                        <input
+                                            type="text"
+                                            className="node-form__input"
+                                            value={pair.key}
+                                            readOnly
+                                        />
+
+                                        <input
+                                            type="number"
+                                            step="1"
+                                            className="node-form__input"
+                                            value={pair.value}
+                                            readOnly
+                                        />
+
+                                        <button
+                                            type="button"
+                                            className="node-form__small-button node-form__small-button--danger"
+                                            onClick={() => handleDeleteModifierClick(pair.id)}
+                                            disabled={pair.id == null || isAddingModifier || isSaving || isDeleting || modifierToDeleteId != null}
+                                        >
+                                            {modifierToDeleteId != null && String(modifierToDeleteId) === String(pair.id)
+                                                ? 'Deleting...'
+                                                : 'Delete'}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         {saveMessage && <p className="node-form__hint">{saveMessage}</p>}

@@ -35,7 +35,7 @@
                 throw new KeyNotFoundException($"Node with ID {nodeId} not found.");
             }
 
-            if (this.nodeModifiersRepository.AllAsNoTracking().Any(n => n.ModifierType == modifierType))
+            if (this.nodeModifiersRepository.AllAsNoTracking().Any(n => n.NodeId == nodeId && n.ModifierType == modifierType))
             {
                 throw new InvalidOperationException($"A modifier of type {modifierType} already exists for this node.");
             }

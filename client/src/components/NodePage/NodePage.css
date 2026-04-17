@@ -113,6 +113,10 @@
   align-items: center;
 }
 
+.node-form__pair--adder {
+  margin-bottom: 0.25rem;
+}
+
 .node-form__small-button {
   border: 1px solid #d1d5db;
   border-radius: 8px;
@@ -151,6 +155,11 @@
   justify-content: flex-end;
   gap: 0.5rem;
   padding-top: 0.5rem;
+}
+
+.node-form__actions--top {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .node-form__submit-button {
