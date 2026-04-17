@@ -44,13 +44,15 @@ In the upper right corner of the screen, there is a dropdown menu for accessing 
 
 The Find Path button makes the API call to retrieve the shipment's optimal path from the start to the end node. Provided there are no constraints, that would be just the result of performing Uniform Cost Search algorithm (Dijkstra's algorithm with added early stop) on the given graph.
 
-![Complex Shipment](./assets/complex_path.png)
+![Simple Shipment](./assets/shortest_path.png)
 
 When constraints are added, the algorithm applied has to make sure they are fulfilled. In the example we have an `And` Constraint that combines two smaller constraints. The combined constraints are for `MaxRisk` (max number of broken nodes on the path) with a value of `1` and `RequireCooling` (nodes must be provided with cooling capabilities that are lower or equal to the required value) with a value of `-5`. Nodes 1, 3, 4, 6 and 7 all have modifier for `CoolingNode` with value equal to `-10` and Node 5 has cooling `-5`. The shortest path is 1 -> 3 -> 5 -> 7 but since the `MaxRisk` constraint would not be fulfilled, the answer becomes a slightly longer path: 1 -> 3 -> 4 -> 6 -> 7.
 
-![Create Page](./assets/create_page.png)
+![Complex Shipment](./assets/complex_path.png)
 
 Nodes, Edges and Shipments can be created by selecting any of the Add buttons in the header and filling the necessary data.
+
+![Create Page](./assets/create_page.png)
 
 ## Notes:
 The project is still in development. Most of the business logic is complete but there is room for refactoring and additional validation and exception handling.
