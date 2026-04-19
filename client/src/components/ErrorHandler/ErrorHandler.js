@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../routes';
 import './ErrorHandler.css';
 
 const ErrorHandler = () => {
@@ -15,7 +16,7 @@ const ErrorHandler = () => {
 				<button type="button" className="error-handler__button" onClick={() => navigate(-1)}>
 					Go Back
 				</button>
-				<button type="button" className="error-handler__button error-handler__button--primary" onClick={() => navigate('/')}>
+				<button type="button" className="error-handler__button error-handler__button--primary" onClick={() => navigate(ROUTES.home)}>
 					Go To Graph
 				</button>
 			</div>

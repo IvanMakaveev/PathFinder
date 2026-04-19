@@ -1,42 +1,10 @@
-.edge-page {
-  min-height: calc(100vh - 64px);
-  box-sizing: border-box;
-  padding: 1.25rem;
-  display: grid;
-  grid-template-columns: 2.5fr 1.5fr;
-  gap: 1rem;
-  align-items: stretch;
-}
-
-.edge-page__graph-shell {
-  width: 100%;
-  height: calc(100vh - 64px - 2.5rem);
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  background: #ffffff;
-  overflow: hidden;
-}
-
-.edge-page__side-panel {
-  height: calc(100vh - 64px - 2.5rem);
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 1rem;
-  box-sizing: border-box;
-  text-align: left;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-}
-
 .edge-page__title {
   margin: 0 0 0.5rem 0;
 }
 
 .edge-page__hint {
   margin: 0;
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 
 .edge-form {
@@ -55,19 +23,19 @@
 
 .edge-form__label {
   font-size: 0.9rem;
-  color: #374151;
+  color: var(--color-text-secondary);
   font-weight: 600;
 }
 
 .edge-form__input {
   height: 38px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
   padding: 0 0.75rem;
   font-size: 0.95rem;
   outline: none;
   background: #f9fafb;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .edge-form__actions {
@@ -79,10 +47,10 @@
 }
 
 .edge-form__submit-button {
-  border: 1px solid #2563eb;
-  border-radius: 8px;
-  background: #2563eb;
-  color: #ffffff;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-bg-panel);
   padding: 0.55rem 1rem;
   font-size: 0.9rem;
   font-weight: 700;
@@ -90,18 +58,18 @@
 }
 
 .edge-form__submit-button:hover:not(:disabled) {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 .edge-form__submit-button--danger {
-  border-color: #dc2626;
-  background: #dc2626;
+  border-color: var(--color-danger);
+  background: var(--color-danger);
 }
 
 .edge-form__submit-button--danger:hover:not(:disabled) {
-  border-color: #b91c1c;
-  background: #b91c1c;
+  border-color: var(--color-danger-hover);
+  background: var(--color-danger-hover);
 }
 
 .edge-form__submit-button:disabled {
@@ -111,17 +79,6 @@
 
 .edge-form__hint {
   margin: 0;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
-}
-
-@media (max-width: 900px) {
-  .edge-page {
-    grid-template-columns: 1fr;
-  }
-
-  .edge-page__graph-shell,
-  .edge-page__side-panel {
-    height: 50vh;
-  }
 }

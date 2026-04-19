@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Graph from '../Graph';
 import * as edgeService from '../../services/edgeService';
 import * as graphService from '../../services/graphService';
+import { ROUTES } from '../../routes';
+import { getApiErrorMessage } from '../../utils/apiError';
 import './EdgePage.css';
 
 const normalizeEdgeData = (edgeData, fallbackId) => {
@@ -46,23 +48,23 @@ const EdgePage = () => {
         setMessage('');
 
         edgeService.getEdgeDetails(edgeid)
-            .then((edgeData) => {
+            .then((edgeResult) => {
                 if (!isMounted) {
                     return;
                 }
 
-                if (edgeData != undefined) {
-                    setEdgeDetails(normalizeEdgeData(edgeData, edgeid));
+                if (edgeResult?.ok && edgeResult?.data) {
+                    setEdgeDetails(normalizeEdgeData(edgeResult.data, edgeid));
                     return;
                 }
 
                 // Fallback for APIs that don't expose edge-details endpoint yet.
-                return graphService.getGraphData().then((graphData) => {
+                return graphService.getGraphData().then((graphResult) => {
                     if (!isMounted) {
                         return;
                     }
 
-                    const edges = graphData?.edges ?? [];
+                    const edges = graphResult?.ok ? (graphResult.data?.edges ?? []) : [];
                     const matchingEdge = edges.find((edge) => String(edge.id) === String(edgeid));
                     setEdgeDetails(normalizeEdgeData(matchingEdge, edgeid));
 
@@ -94,14 +96,14 @@ const EdgePage = () => {
 
         edgeService.deleteEdge(edgeDetails.id)
             .then((res) => {
-                if (res == undefined) {
-                    setMessage('Unable to delete edge.');
+                if (!res?.ok) {
+                    setMessage(getApiErrorMessage(res, 'Unable to delete edge.'));
                     return;
                 }
 
                 setMessage('Edge deleted.');
                 setGraphRefreshKey((prev) => prev + 1);
-                navigate('/');
+                navigate(ROUTES.home);
             })
             .catch(() => {
                 setMessage('Unable to delete edge.');
@@ -112,11 +114,11 @@ const EdgePage = () => {
     };
 
     return (
-        <section className="edge-page">
-            <div className="edge-page__graph-shell">
+        <section className="edge-page page-layout">
+            <div className="edge-page__graph-shell page-layout__graph-shell">
                 <Graph key={graphRefreshKey} />
             </div>
-            <aside className="edge-page__side-panel">
+            <aside className="edge-page__side-panel page-layout__side-panel">
                 <h2 className="edge-page__title">Edge Details</h2>
 
                 {isLoading && <p className="edge-page__hint">Loading edge data...</p>}

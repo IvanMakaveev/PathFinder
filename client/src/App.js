@@ -10,6 +10,8 @@ import ShipmentPage from './components/ShipmentPage';
 import CreateNode from './components/CreateNode';
 import CreateEdge from './components/CreateEdge';
 import CreateShipment from './components/CreateShipment';
+import { ShipmentProvider } from './contexts/ShipmentContext';
+import { ROUTES } from './routes';
 
 function App() {
 
@@ -17,17 +19,19 @@ function App() {
         <div className="App">
             <main className="app-main">
                 <BrowserRouter>
-                    <Header />
-                    <Routes>
-                        <Route path="/" element={<HomePage />} />
-                        <Route path="/createNode" element={<CreateNode />} />
-                        <Route path="/createEdge" element={<CreateEdge />} />
-                        <Route path="/createShipment" element={<CreateShipment />} />
-                        <Route path="/shipment/:shipmentid" element={<ShipmentPage />} />
-                        <Route path="/error" element={<ErrorPage />} />
-                        <Route path="/node/:nodeid" element={<NodePage />} />
-                        <Route path="/edge/:edgeid" element={<EdgePage />} />
-                    </Routes>
+                    <ShipmentProvider>
+                        <Header />
+                        <Routes>
+                            <Route path={ROUTES.home} element={<HomePage />} />
+                            <Route path={ROUTES.createNode} element={<CreateNode />} />
+                            <Route path={ROUTES.createEdge} element={<CreateEdge />} />
+                            <Route path={ROUTES.createShipment} element={<CreateShipment />} />
+                            <Route path={ROUTES.shipment()} element={<ShipmentPage />} />
+                            <Route path={ROUTES.error} element={<ErrorPage />} />
+                            <Route path={ROUTES.node()} element={<NodePage />} />
+                            <Route path={ROUTES.edge()} element={<EdgePage />} />
+                        </Routes>
+                    </ShipmentProvider>
                 </BrowserRouter>
             </main>
         </div>

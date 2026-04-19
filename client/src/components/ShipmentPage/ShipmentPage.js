@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Graph from '../Graph';
 import * as shipmentService from '../../services/shipmentService';
+import { getApiErrorMessage } from '../../utils/apiError';
 import './ShipmentPage.css';
 
 const ShipmentPage = () => {
@@ -31,19 +32,22 @@ const ShipmentPage = () => {
             shipmentService.getShipmentDetails(shipmentid),
             shipmentService.getShipmentConstraint(shipmentid),
         ])
-            .then(([details, constraint]) => {
+            .then(([detailsResult, constraintResult]) => {
                 if (!isMounted) {
                     return;
                 }
 
-                if (details == undefined) {
+                const details = detailsResult?.ok ? detailsResult.data : undefined;
+                const constraint = constraintResult?.ok ? (constraintResult.data ?? '') : '';
+
+                if (!details) {
                     setShipmentData({
                         id: shipmentid,
                         name: '',
                         description: '',
                         startNodeName: '',
                         endNodeName: '',
-                        constraintJson: constraint ?? '',
+                        constraintJson: constraint,
                     });
                     return;
                 }
@@ -54,7 +58,7 @@ const ShipmentPage = () => {
                     description: details.description ?? '',
                     startNodeName: details.startNodeName ?? '',
                     endNodeName: details.endNodeName ?? '',
-                    constraintJson: constraint ?? '',
+                    constraintJson: constraint,
                 });
             })
             .finally(() => {
@@ -71,17 +75,12 @@ const ShipmentPage = () => {
     const handleFindPath = () => {
         shipmentService.findShipmentPath(shipmentid)
             .then((result) => {
-                if (!Array.isArray(result)) {
+                if (!result?.ok || !Array.isArray(result.data) || result.data.length === 0) {
                     setPathResult('No path found.');
                     return;
                 }
 
-                if (result.length === 0) {
-                    setPathResult('No path found.');
-                    return;
-                }
-
-                setPathResult(result.join(' \u2192 '));
+                setPathResult(result.data.join(' -> '));
             })
             .catch(() => {
                 setPathResult('No path found.');
@@ -94,8 +93,8 @@ const ShipmentPage = () => {
 
         shipmentService.editShipmentConstraint(shipmentid, shipmentData.constraintJson)
             .then((res) => {
-                if (res == undefined) {
-                    setConstraintMessage('Unable to save constraint JSON.');
+                if (!res?.ok) {
+                    setConstraintMessage(getApiErrorMessage(res, 'Unable to save constraint JSON.'));
                     return;
                 }
 
@@ -115,8 +114,8 @@ const ShipmentPage = () => {
 
         shipmentService.deleteShipmentConstraint(shipmentid)
             .then((res) => {
-                if (res == undefined) {
-                    setConstraintMessage('Unable to delete constraint JSON.');
+                if (!res?.ok) {
+                    setConstraintMessage(getApiErrorMessage(res, 'Unable to delete constraint JSON.'));
                     return;
                 }
 
@@ -135,12 +134,12 @@ const ShipmentPage = () => {
     };
 
     return (
-        <section className="shipment-page">
-            <div className="shipment-page__graph-shell">
+        <section className="shipment-page page-layout">
+            <div className="shipment-page__graph-shell page-layout__graph-shell">
                 <Graph />
             </div>
 
-            <aside className="shipment-page__side-panel">
+            <aside className="shipment-page__side-panel page-layout__side-panel">
                 <h2 className="shipment-page__title">Shipment Details</h2>
 
                 <form className="shipment-form" onSubmit={(event) => event.preventDefault()}>

@@ -5,12 +5,16 @@ import { useNavigate } from "react-router-dom";
 
 import "reactflow/dist/style.css";
 import * as graphService from '../../services/graphService';
+import { ROUTES } from '../../routes';
+import { NODE_TYPES } from '../../constants/nodeOptions';
 
 const nodeTypes = {};
 const edgeTypes = {};
+const nodeWidth = 90;
+const nodeHeight = 90;
 
 const getNodeTypeColors = (nodeType) => {
-    if (nodeType === "NormalNode" || nodeType === 0 || nodeType === "0") {
+    if (nodeType === NODE_TYPES.NORMAL) {
         return {
             background: "#dcfce7",
             border: "#16a34a",
@@ -18,7 +22,7 @@ const getNodeTypeColors = (nodeType) => {
         };
     }
 
-    if (nodeType === "BrokenNode" || nodeType === 1 || nodeType === "1") {
+    if (nodeType === NODE_TYPES.BROKEN) {
         return {
             background: "#ffedd5",
             border: "#ea580c",
@@ -33,123 +37,127 @@ const getNodeTypeColors = (nodeType) => {
     };
 };
 
+const mapApiNodeToFlowNode = (node) => {
+    const colors = getNodeTypeColors(node.nodeType);
+
+    return {
+        id: String(node.id),
+        data: { label: node.name ?? `Node ${node.id}` },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+        style: {
+            width: nodeWidth,
+            height: nodeHeight,
+            borderRadius: "50%",
+            border: `2px solid ${colors.border}`,
+            backgroundColor: colors.background,
+            color: colors.text,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            fontWeight: 600,
+        },
+    };
+};
+
+const mapApiEdgeToFlowEdge = (edge) => {
+    const edgeId = edge.id ?? `e-${edge.fromNodeId}-${edge.toNodeId}`;
+
+    return {
+        id: String(edgeId),
+        source: String(edge.fromNodeId),
+        target: String(edge.toNodeId),
+        label: edge.length != null ? String(edge.length) : undefined,
+        type: "straight",
+        style: { strokeWidth: 2 },
+        markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 10,
+            height: 10,
+            color: "#1f2937",
+        },
+        labelStyle: {
+            fontSize: 16,
+            fontWeight: 700,
+            fill: "#111827",
+        },
+        labelBgStyle: { fill: "#ffffff", fillOpacity: 0.9 },
+        labelBgPadding: [8, 4],
+        labelBgBorderRadius: 6,
+    };
+};
+
+const getLayoutedElements = (nodes, edges) => {
+    const g = new dagre.graphlib.Graph();
+    g.setDefaultEdgeLabel(() => ({}));
+    g.setGraph({
+        rankdir: "LR",
+        ranksep: 150,
+        nodesep: 500,
+        edgesep: 50,
+    });
+
+    nodes.forEach((node) => {
+        g.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    });
+
+    edges.forEach((edge) => {
+        g.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(g);
+
+    return {
+        nodes: nodes.map((node) => {
+            const pos = g.node(node.id);
+            return {
+                ...node,
+                position: {
+                    x: pos.x - nodeWidth / 2,
+                    y: pos.y - nodeHeight / 2,
+                },
+            };
+        }),
+        edges,
+    };
+};
+
 const Graph = () => {
     const navigate = useNavigate();
-    const [graphData, setGraphData] = useState({ Nodes: [], Edges: [] });
+    const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
 
     const updateInfo = () => {
         graphService.getGraphData()
-            .then(res => {
-                setGraphData(res ?? { Nodes: [], Edges: [] });
-            })
-    }
+            .then((res) => {
+                if (!res.ok) {
+                    setGraphData({ nodes: [], edges: [] });
+                    return;
+                }
+
+                setGraphData(res.data ?? { nodes: [], edges: [] });
+            });
+    };
 
     useEffect(() => {
         updateInfo();
     }, []);
 
-    const nodeWidth = 90;
-    const nodeHeight = 90;
-
-    const getLayoutedElements = (nodes, edges) => {
-        const g = new dagre.graphlib.Graph();
-        g.setDefaultEdgeLabel(() => ({}));
-        g.setGraph({
-            rankdir: "LR",
-            ranksep: 150,
-            nodesep: 500,
-            edgesep: 50,
-        });
-
-        nodes.forEach((node) => {
-            g.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-        });
-
-        edges.forEach((edge) => {
-            g.setEdge(edge.source, edge.target);
-        });
-
-        dagre.layout(g);
-
-        return {
-            nodes: nodes.map((node) => {
-                const pos = g.node(node.id);
-                return {
-                    ...node,
-                    position: {
-                        x: pos.x - nodeWidth / 2,
-                        y: pos.y - nodeHeight / 2,
-                    },
-                };
-            }),
-            edges,
-        };
-    };
-
     const { nodes, edges } = useMemo(() => {
         const sourceNodes = graphData?.nodes ?? [];
         const sourceEdges = graphData?.edges ?? [];
-        
-        const nodesFromApi = sourceNodes.map((node) => {
-            const colors = getNodeTypeColors(node.nodeType);
-
-            return {
-                id: String(node.id),
-                data: { label: node.name ?? `Node ${node.id}` },
-                sourcePosition: Position.Right,
-                targetPosition: Position.Left,
-                style: {
-                    width: nodeWidth,
-                    height: nodeHeight,
-                    borderRadius: "50%",
-                    border: `2px solid ${colors.border}`,
-                    backgroundColor: colors.background,
-                    color: colors.text,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    textAlign: "center",
-                    fontWeight: 600,
-                },
-            };
-        });
-
-        const edgesFromApi = sourceEdges.reverse().map((edge) => {
-            const edgeId = edge.id ?? `e-${edge.fromNodeId}-${edge.toNodeId}`;
-
-            return {
-                id: String(edgeId),
-                source: String(edge.fromNodeId),
-                target: String(edge.toNodeId),
-                label: edge.length != null ? String(edge.length) : undefined,
-                type: "straight",
-                style: { strokeWidth: 2 },
-                markerEnd: {
-                    type: MarkerType.ArrowClosed,
-                    width: 10,
-                    height: 10,
-                    color: "#1f2937",
-                },
-                labelStyle: {
-                    fontSize: 16,
-                    fontWeight: 700,
-                    fill: "#111827",
-                },
-                labelBgStyle: { fill: "#ffffff", fillOpacity: 0.9 },
-                labelBgPadding: [8, 4],
-                labelBgBorderRadius: 6,
-            };
-        });
+        const nodesFromApi = sourceNodes.map(mapApiNodeToFlowNode);
+        const edgesFromApi = [...sourceEdges].reverse().map(mapApiEdgeToFlowEdge);
 
         return getLayoutedElements(nodesFromApi, edgesFromApi);
     }, [graphData]);
 
     const handleNodeClick = (_event, node) => {
-        navigate(`/node/${encodeURIComponent(node.id)}`);
+        navigate(ROUTES.node(encodeURIComponent(node.id)));
     };
 
     const handleEdgeClick = (_event, edge) => {
-        navigate(`/edge/${encodeURIComponent(edge.id)}`);
+        navigate(ROUTES.edge(encodeURIComponent(edge.id)));
     };
 
     return (
@@ -165,6 +173,6 @@ const Graph = () => {
             />
         </div>
     );
-}
+};
 
 export default Graph;

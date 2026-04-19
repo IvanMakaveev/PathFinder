@@ -2,36 +2,23 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Graph from '../Graph';
 import * as nodeService from '../../services/nodeService';
+import { ROUTES } from '../../routes';
+import {
+    NODE_MODIFIER_TYPE_OPTIONS,
+    NODE_TYPE_OPTIONS,
+} from '../../constants/nodeOptions';
+import { getApiErrorMessage } from '../../utils/apiError';
 import './NodePage.css';
 
-const NODE_TYPE_OPTIONS = ['NormalNode', 'BrokenNode'];
-const ATTRIBUTE_KEY_OPTIONS = ['CoolantNode', 'SpecializedNode'];
-
 const normalizeModifierType = (rawType) => {
-    if (rawType === 0 || rawType === '0') {
-        return 'CoolantNode';
-    }
-
-    if (rawType === 1 || rawType === '1') {
-        return 'SpecializedNode';
-    }
-
-    if (ATTRIBUTE_KEY_OPTIONS.includes(rawType)) {
+    if (NODE_MODIFIER_TYPE_OPTIONS.includes(rawType)) {
         return rawType;
     }
 
-    return ATTRIBUTE_KEY_OPTIONS[0];
+    return NODE_MODIFIER_TYPE_OPTIONS[0];
 };
 
 const normalizeTypeValue = (rawType) => {
-    if (rawType === 0 || rawType === '0') {
-        return 'NormalNode';
-    }
-
-    if (rawType === 1 || rawType === '1') {
-        return 'BrokenNode';
-    }
-
     if (NODE_TYPE_OPTIONS.includes(rawType)) {
         return rawType;
     }
@@ -82,7 +69,7 @@ const NodePage = () => {
     const [loadError, setLoadError] = useState('');
     const [saveMessage, setSaveMessage] = useState('');
     const [newModifier, setNewModifier] = useState({
-        key: ATTRIBUTE_KEY_OPTIONS[0],
+        key: NODE_MODIFIER_TYPE_OPTIONS[0],
         value: '0',
     });
     const [nodeDetails, setNodeDetails] = useState(() =>
@@ -100,18 +87,18 @@ const NodePage = () => {
             nodeService.getNodeDetails(nodeid),
             nodeService.getNodeModifiers(nodeid),
         ])
-            .then(([detailsData, modifiersData]) => {
+            .then(([detailsResult, modifiersResult]) => {
                 if (!isMounted) {
                     return;
                 }
 
-                if (detailsData == undefined || modifiersData == undefined) {
+                if (!detailsResult?.ok || !modifiersResult?.ok) {
                     setLoadError('Unable to load node details.');
                     setNodeDetails(normalizeNodeData({ id: nodeid }, [], nodeid));
                     return;
                 }
 
-                setNodeDetails(normalizeNodeData(detailsData, modifiersData, nodeid));
+                setNodeDetails(normalizeNodeData(detailsResult.data, modifiersResult.data, nodeid));
             })
             .catch(() => {
                 if (!isMounted) {
@@ -138,8 +125,8 @@ const NodePage = () => {
 
         nodeService.editNodeType(nodeDetails.id, nodeDetails.type)
             .then((res) => {
-                if (res == undefined) {
-                    setSaveMessage('Unable to save node type.');
+                if (!res?.ok) {
+                    setSaveMessage(getApiErrorMessage(res, 'Unable to save node type.'));
                     return;
                 }
 
@@ -160,13 +147,13 @@ const NodePage = () => {
 
         nodeService.deleteNode(nodeDetails.id)
             .then((res) => {
-                if (res == undefined) {
-                    setSaveMessage('Unable to delete node.');
+                if (!res?.ok) {
+                    setSaveMessage(getApiErrorMessage(res, 'Unable to delete node.'));
                     return;
                 }
 
                 setSaveMessage('Node deleted.');
-                navigate('/');
+                navigate(ROUTES.home);
             })
             .catch(() => {
                 setSaveMessage('Unable to delete node.');
@@ -178,14 +165,14 @@ const NodePage = () => {
 
     const reloadModifiers = () => {
         return nodeService.getNodeModifiers(nodeid)
-            .then((modifiersData) => {
-                if (modifiersData == undefined) {
+            .then((res) => {
+                if (!res?.ok) {
                     return false;
                 }
 
                 setNodeDetails((prev) => ({
                     ...prev,
-                    attributes: normalizeModifiers(modifiersData),
+                    attributes: normalizeModifiers(res.data),
                 }));
 
                 return true;
@@ -206,11 +193,7 @@ const NodePage = () => {
         nodeService.addNodeModifier(nodeDetails.id, newModifier.key, numericValue)
             .then(async (res) => {
                 if (res?.ok !== true) {
-                    const values = Object.values(res?.errorData ?? {});
-                    const message = values.flatMap((value) =>
-                        Array.isArray(value) ? value : [String(value)]
-                    ).join(' ');
-                    setSaveMessage(message || 'Unable to add modifier.');
+                    setSaveMessage(getApiErrorMessage(res, 'Unable to add modifier.'));
                     return;
                 }
 
@@ -222,7 +205,7 @@ const NodePage = () => {
                     const createdType = created?.modifierType ?? created?.ModifierType ?? newModifier.key;
                     const createdValue = created?.modifierValue ?? created?.Value ?? numericValue;
 
-                    if (createdId != undefined) {
+                    if (createdId != null) {
                         setNodeDetails((prev) => ({
                             ...prev,
                             attributes: [
@@ -254,8 +237,8 @@ const NodePage = () => {
 
         nodeService.deleteNodeModifier(modifierId)
             .then(async (res) => {
-                if (res == undefined) {
-                    setSaveMessage('Unable to delete modifier.');
+                if (!res?.ok) {
+                    setSaveMessage(getApiErrorMessage(res, 'Unable to delete modifier.'));
                     return;
                 }
 
@@ -278,11 +261,11 @@ const NodePage = () => {
     };
 
     return (
-        <section className="node-page">
-            <div className="node-page__graph-shell">
+        <section className="node-page page-layout">
+            <div className="node-page__graph-shell page-layout__graph-shell">
                 <Graph key={graphRefreshKey} />
             </div>
-            <aside className="node-page__side-panel">
+            <aside className="node-page__side-panel page-layout__side-panel">
                 <h2 className="node-page__title">Node Details</h2>
 
                 {isLoading && <p className="node-page__hint">Loading node data...</p>}
@@ -323,7 +306,7 @@ const NodePage = () => {
                                 type="button"
                                 className="node-form__submit-button"
                                 onClick={handleEditClick}
-                                disabled={isSaving || isDeleting || isAddingModifier || modifierToDeleteId != null}
+                                disabled={isSaving || isDeleting || isAddingModifier || modifierToDeleteId !== null}
                             >
                                 {isSaving ? 'Saving...' : 'Edit'}
                             </button>
@@ -331,7 +314,7 @@ const NodePage = () => {
                                 type="button"
                                 className="node-form__submit-button node-form__submit-button--danger"
                                 onClick={handleDeleteClick}
-                                disabled={isSaving || isDeleting || isAddingModifier || modifierToDeleteId != null}
+                                disabled={isSaving || isDeleting || isAddingModifier || modifierToDeleteId !== null}
                             >
                                 {isDeleting ? 'Deleting...' : 'Delete'}
                             </button>
@@ -350,7 +333,7 @@ const NodePage = () => {
                                         setNewModifier((prev) => ({ ...prev, key: event.target.value }))
                                     }
                                 >
-                                    {ATTRIBUTE_KEY_OPTIONS.map((option) => (
+                                    {NODE_MODIFIER_TYPE_OPTIONS.map((option) => (
                                         <option key={option} value={option}>
                                             {option}
                                         </option>
@@ -372,7 +355,7 @@ const NodePage = () => {
                                     type="button"
                                     className="node-form__small-button"
                                     onClick={handleAddModifierClick}
-                                    disabled={isAddingModifier || isSaving || isDeleting || modifierToDeleteId != null}
+                                    disabled={isAddingModifier || isSaving || isDeleting || modifierToDeleteId !== null}
                                 >
                                     {isAddingModifier ? 'Adding...' : 'Add'}
                                 </button>
@@ -404,9 +387,9 @@ const NodePage = () => {
                                             type="button"
                                             className="node-form__small-button node-form__small-button--danger"
                                             onClick={() => handleDeleteModifierClick(pair.id)}
-                                            disabled={pair.id == null || isAddingModifier || isSaving || isDeleting || modifierToDeleteId != null}
+                                            disabled={pair.id == null || isAddingModifier || isSaving || isDeleting || modifierToDeleteId !== null}
                                         >
-                                            {modifierToDeleteId != null && String(modifierToDeleteId) === String(pair.id)
+                                            {modifierToDeleteId !== null && String(modifierToDeleteId) === String(pair.id)
                                                 ? 'Deleting...'
                                                 : 'Delete'}
                                         </button>

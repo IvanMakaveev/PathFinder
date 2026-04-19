@@ -21,9 +21,9 @@ The high-level architecture defines four distinct layers:
 
 The **Service** layer implements two polymorphic hierarchies - Nodes and Constraints. This allows the pathfinding algorithm to work without any knowledge of the underlying implementations for the different types of nodes and constraints.
 
-The base `abstract class Node` exposes an abstract method that recieves `PathFindingContext` which can be modified to influence the pathfinding algorithm.
+The base `abstract class Node` exposes an abstract method that receives `PathFindingContext` which can be modified to influence the pathfinding algorithm.
 
-The base `abstract class ShipmentConstraint` exposes an abstract method `IsSatisfied` that recieves the current `PathFindingContext` and `Node` element and returns if that constraint is satisfied or not.
+The base `abstract class ShipmentConstraint` exposes an abstract method `IsSatisfied` that receives the current `PathFindingContext` and `Node` element and returns whether that constraint is satisfied or not.
 
 Additionally, the use of **Factory Pattern** decouples any of the services from the two hierarchies and enables a quick and easy way to extend them without changing the logic of the pathfinding algorithm.
 

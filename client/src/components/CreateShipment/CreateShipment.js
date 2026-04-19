@@ -3,10 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import * as nodeService from '../../services/nodeService';
 import * as shipmentService from '../../services/shipmentService';
 import Graph from '../Graph';
+import { useShipments } from '../../contexts/ShipmentContext';
+import { ROUTES } from '../../routes';
+import { getApiErrorMessage } from '../../utils/apiError';
 import './CreateShipment.css';
 
 const CreateShipment = () => {
     const navigate = useNavigate();
+    const { addShipment } = useShipments();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [nodeOptions, setNodeOptions] = useState([]);
@@ -18,8 +22,8 @@ const CreateShipment = () => {
     });
 
     useEffect(() => {
-        nodeService.getAllNodes().then((data) => {
-            const nodes = Array.isArray(data) ? data : [];
+        nodeService.getAllNodes().then((result) => {
+            const nodes = Array.isArray(result?.data) ? result.data : [];
             const options = nodes.map((node) => ({
                 id: String(node.id ?? ''),
                 name: node.name ?? `Node ${node.id ?? ''}`,
@@ -63,27 +67,19 @@ const CreateShipment = () => {
             })
             .then((res) => {
                 if (res?.ok === true) {
-                    if (res?.id != null) {
-                        window.dispatchEvent(
-                            new CustomEvent('shipment-created', {
-                                detail: {
-                                    id: res.id,
-                                    name: trimmedName,
-                                },
-                            })
-                        );
+                    const createdId = res?.data?.id;
+                    if (createdId != null) {
+                        addShipment({
+                            id: createdId,
+                            name: trimmedName,
+                        });
                     }
 
-                    navigate('/');
+                    navigate(ROUTES.home);
                     return;
                 }
 
-                const values = Object.values(res?.errorData ?? {});
-                const flattened = values.flatMap((value) =>
-                    Array.isArray(value) ? value : [String(value)]
-                );
-                const message = flattened.join(' ');
-                setErrorMessage(message || 'Unable to create shipment.');
+                setErrorMessage(getApiErrorMessage(res, 'Unable to create shipment.'));
             })
             .catch(() => {
                 setErrorMessage('Unable to create shipment.');
@@ -94,12 +90,12 @@ const CreateShipment = () => {
     };
 
     return (
-        <section className="create-shipment-page">
-            <div className="create-shipment-page__graph-shell">
+        <section className="create-shipment-page page-layout">
+            <div className="create-shipment-page__graph-shell page-layout__graph-shell">
                 <Graph />
             </div>
 
-            <aside className="create-shipment-page__side-panel">
+            <aside className="create-shipment-page__side-panel page-layout__side-panel">
                 <form className="create-shipment-form" onSubmit={(event) => event.preventDefault()}>
                     <h2 className="create-shipment-form__title">Create Shipment</h2>
 

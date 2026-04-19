@@ -1,49 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import * as shipmentService from '../../services/shipmentService';
+import { useShipments } from '../../contexts/ShipmentContext';
+import { ROUTES } from '../../routes';
 import './Header.css';
 
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const [shipments, setShipments] = useState([]);
+    const { shipments } = useShipments();
     const [selectedShipmentId, setSelectedShipmentId] = useState('');
-
-    useEffect(() => {
-        shipmentService.getShipments().then((data) => {
-            const options = Array.isArray(data) ? data : [];
-            setShipments(options);
-        });
-    }, []);
-
-    useEffect(() => {
-        const handleShipmentCreated = (event) => {
-            const created = event?.detail;
-            const createdId = created?.id;
-            const createdName = created?.name;
-
-            if (createdId == null || createdName == null || createdName === '') {
-                return;
-            }
-
-            const idAsString = String(createdId);
-
-            setShipments((prev) => {
-                const exists = prev.some((shipment) => String(shipment.id ?? '') === idAsString);
-                if (exists) {
-                    return prev;
-                }
-
-                return [...prev, { id: createdId, name: createdName }];
-            });
-        };
-
-        window.addEventListener('shipment-created', handleShipmentCreated);
-
-        return () => {
-            window.removeEventListener('shipment-created', handleShipmentCreated);
-        };
-    }, []);
 
     useEffect(() => {
         const match = location.pathname.match(/^\/shipment\/([^/]+)$/);
@@ -61,26 +26,26 @@ const Header = () => {
         setSelectedShipmentId(shipmentId);
 
         if (shipmentId === '') {
-            navigate('/');
+            navigate(ROUTES.home);
             return;
         }
 
-        navigate(`/shipment/${encodeURIComponent(shipmentId)}`);
+        navigate(ROUTES.shipment(encodeURIComponent(shipmentId)));
     };
 
     return (
         <header className="app-header">
             <div className="app-header__left">
-                <button type="button" className="app-header__button" onClick={() => navigate('/')}>
+                <button type="button" className="app-header__button" onClick={() => navigate(ROUTES.home)}>
                     Graph
                 </button>
-                <button type="button" className="app-header__button" onClick={() => navigate('/createNode')}>
+                <button type="button" className="app-header__button" onClick={() => navigate(ROUTES.createNode)}>
                     Add Node
                 </button>
-                <button type="button" className="app-header__button" onClick={() => navigate('/createEdge')}>
+                <button type="button" className="app-header__button" onClick={() => navigate(ROUTES.createEdge)}>
                     Add Edge
                 </button>
-                <button type="button" className="app-header__button" onClick={() => navigate('/createShipment')}>
+                <button type="button" className="app-header__button" onClick={() => navigate(ROUTES.createShipment)}>
                     Add Shipment
                 </button>
             </div>

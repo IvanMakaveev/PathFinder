@@ -1,148 +1,110 @@
+import { request } from './apiClient';
+
 const url = process.env.REACT_APP_API_URL + 'shipments/';
 
 export const createShipment = (shipmentData) => {
-    return fetch(url, {
+    return request(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(shipmentData),
-    })
-        .then(async (res) => {
-            if (res.ok == true) {
-                const responseText = await res.text().catch(() => '');
-                if (responseText == null || responseText === '') {
-                    return { ok: true };
-                }
+    }, {
+        responseType: 'json',
+        fallbackErrorMessage: 'Unable to create shipment.',
+    }).then((result) => {
+        if (!result.ok) {
+            return result;
+        }
 
-                try {
-                    const parsed = JSON.parse(responseText);
-                    if (typeof parsed === 'number') {
-                        return { ok: true, id: parsed };
-                    }
+        const payload = result.data;
+        let id;
 
-                    if (typeof parsed === 'object' && parsed != null) {
-                        const parsedId = parsed.id ?? parsed.shipmentId;
-                        if (typeof parsedId === 'number' || typeof parsedId === 'string') {
-                            return { ok: true, id: Number(parsedId) };
-                        }
-                    }
-                }
-                catch {
-                    const maybeNumber = Number(responseText);
-                    if (Number.isFinite(maybeNumber)) {
-                        return { ok: true, id: maybeNumber };
-                    }
-                }
+        if (typeof payload === 'number' || typeof payload === 'string') {
+            id = Number(payload);
+        }
+        else if (payload && typeof payload === 'object') {
+            id = Number(payload.id ?? payload.shipmentId);
+        }
 
-                return { ok: true };
-            }
-
-            const errorData = await res.json().catch(() => undefined);
-            return { ok: false, errorData };
-        })
-        .catch((res) => {
-            console.log(res);
-        });
+        return {
+            ...result,
+            data: {
+                id: Number.isFinite(id) ? id : undefined,
+            },
+        };
+    });
 };
 
 export const getShipments = () => {
-    return fetch(url)
-        .then((res) => {
-            if (res.ok == true) {
-                return res.json();
-            }
-            return [];
-        })
-        .catch((res) => {
-            console.log(res);
-            return [];
-        });
+    return request(url, {}, {
+        responseType: 'json',
+        fallbackErrorMessage: 'Unable to load shipments.',
+    });
 };
 
 export const getShipmentDetails = (shipmentId) => {
-    return fetch(`${url}${shipmentId}`)
-        .then((res) => {
-            if (res.ok == true) {
-                return res.json();
-            }
-            return undefined;
-        })
-        .catch((res) => {
-            console.log(res);
-        });
+    return request(`${url}${shipmentId}`, {}, {
+        responseType: 'json',
+        fallbackErrorMessage: 'Unable to load shipment details.',
+    });
 };
 
 export const getShipmentConstraint = (shipmentId) => {
-    return fetch(`${url}${shipmentId}/constraint`)
-        .then((res) => {
-            if (res.ok == true) {
-                return res.text().then((text) => {
-                    if (text == null || text === '') {
-                        return '';
-                    }
+    return request(`${url}${shipmentId}/constraint`, {}, {
+        responseType: 'text',
+        fallbackErrorMessage: 'Unable to load shipment constraint.',
+    }).then((result) => {
+        if (!result.ok) {
+            return result;
+        }
 
-                    try {
-                        const parsed = JSON.parse(text);
-                        return typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
-                    }
-                    catch {
-                        return text;
-                    }
-                });
-            }
-            else {
-                return undefined;
-            }
-        })
-        .catch((res) => {
-            console.log(res);
-        });
+        const text = result.data ?? '';
+        if (text === '') {
+            return {
+                ...result,
+                data: '',
+            };
+        }
+
+        try {
+            const parsed = JSON.parse(text);
+            return {
+                ...result,
+                data: typeof parsed === 'string' ? parsed : JSON.stringify(parsed),
+            };
+        }
+        catch {
+            return result;
+        }
+    });
 };
 
 export const findShipmentPath = (shipmentId) => {
-    return fetch(`${url}${shipmentId}/path`)
-        .then((res) => {
-            if (res.ok == true) {
-                return res.json();
-            }
-            return undefined;
-        })
-        .catch((res) => {
-            console.log(res);
-        });
+    return request(`${url}${shipmentId}/path`, {}, {
+        responseType: 'json',
+        fallbackErrorMessage: 'Unable to find shipment path.',
+    });
 };
 
 export const editShipmentConstraint = (shipmentId, constraintJson) => {
-    return fetch(`${url}${shipmentId}/constraint`, {
+    return request(`${url}${shipmentId}/constraint`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(constraintJson),
-    })
-        .then((res) => {
-            if (res.ok == true) {
-                return true;
-            }
-            return undefined;
-        })
-        .catch((res) => {
-            console.log(res);
-        });
+    }, {
+        responseType: 'none',
+        fallbackErrorMessage: 'Unable to save constraint JSON.',
+    });
 };
 
 export const deleteShipmentConstraint = (shipmentId) => {
-    return fetch(`${url}${shipmentId}/constraint`, {
+    return request(`${url}${shipmentId}/constraint`, {
         method: 'DELETE',
-    })
-        .then((res) => {
-            if (res.ok == true) {
-                return true;
-            }
-            return undefined;
-        })
-        .catch((res) => {
-            console.log(res);
-        });
+    }, {
+        responseType: 'none',
+        fallbackErrorMessage: 'Unable to delete constraint JSON.',
+    });
 };

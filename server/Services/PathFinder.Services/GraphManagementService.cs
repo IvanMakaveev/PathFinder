@@ -146,15 +146,9 @@
                 .FirstOrDefault();
 
         public IList<NodeModifierDto> GetNodeModifiers(int nodeId)
-            => this.nodeModifiersRepository.All()
+            => this.nodeModifiersRepository.AllAsNoTracking()
                 .Where(m => m.NodeId == nodeId)
-                .Select(m => new NodeModifierDto
-                {
-                    Id = m.Id,
-                    NodeId = m.NodeId,
-                    ModifierType = m.ModifierType,
-                    ModifierValue = m.ModifierValue,
-                })
+                .To<NodeModifierDto>()
                 .ToList();
 
         public async Task RemoveEdgeAsync(int edgeId)

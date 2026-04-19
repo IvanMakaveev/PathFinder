@@ -2,63 +2,56 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as nodeService from '../../services/nodeService';
 import Graph from '../Graph';
+import { useAsyncAction } from '../../hooks/useAsyncAction';
+import { ROUTES } from '../../routes';
+import { NODE_TYPE_OPTIONS } from '../../constants/nodeOptions';
+import { getApiErrorMessage } from '../../utils/apiError';
 import './CreateNode.css';
-
-const NODE_TYPE_OPTIONS = ['NormalNode', 'BrokenNode'];
 
 const CreateNode = () => {
     const navigate = useNavigate();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    const createAction = useAsyncAction();
     const [formData, setFormData] = useState({
         name: '',
         nodeType: NODE_TYPE_OPTIONS[0],
     });
 
-    const handleCreate = () => {
+    const handleCreate = async () => {
         const trimmedName = formData.name.trim();
 
         if (!trimmedName) {
-            setErrorMessage('Name is required.');
+            createAction.setMessage('Name is required.');
             return;
         }
 
-        setIsSubmitting(true);
-        setErrorMessage('');
+        createAction.start();
 
-        nodeService
-            .createNode({
+        try {
+            const res = await nodeService.createNode({
                 name: trimmedName,
                 nodeType: formData.nodeType,
-            })
-            .then((res) => {
-                if (res?.ok === true) {
-                    navigate('/');
-                    return;
-                }
-
-                const values = Object.values(res?.errorData ?? {});
-                const flattened = values.flatMap((value) =>
-                    Array.isArray(value) ? value : [String(value)]
-                );
-                const message = flattened.join(' ');
-                setErrorMessage(message || 'Unable to create node.');
-            })
-            .catch(() => {
-                setErrorMessage('Unable to create node.');
-            })
-            .finally(() => {
-                setIsSubmitting(false);
             });
+
+            if (res?.ok === true) {
+                createAction.finish();
+                navigate(ROUTES.home);
+                return;
+            }
+
+            createAction.finish(getApiErrorMessage(res, 'Unable to create node.'));
+        }
+        catch {
+            createAction.finish('Unable to create node.');
+        }
     };
 
     return (
-        <section className="create-node-page">
-            <div className="create-node-page__graph-shell">
+        <section className="create-node-page page-layout">
+            <div className="create-node-page__graph-shell page-layout__graph-shell">
                 <Graph />
             </div>
 
-            <aside className="create-node-page__side-panel">
+            <aside className="create-node-page__side-panel page-layout__side-panel">
                 <form className="create-node-form" onSubmit={(event) => event.preventDefault()}>
                     <h2 className="create-node-form__title">Create Node</h2>
 
@@ -96,12 +89,12 @@ const CreateNode = () => {
                         type="button"
                         className="create-node-form__button"
                         onClick={handleCreate}
-                        disabled={isSubmitting}
+                        disabled={createAction.isLoading}
                     >
-                        {isSubmitting ? 'Creating...' : 'Create'}
+                        {createAction.isLoading ? 'Creating...' : 'Create'}
                     </button>
 
-                    {errorMessage && <p className="create-node-form__error">{errorMessage}</p>}
+                    {createAction.message && <p className="create-node-form__error">{createAction.message}</p>}
                 </form>
             </aside>
         </section>

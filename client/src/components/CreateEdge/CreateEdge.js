@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import * as edgeService from '../../services/edgeService';
 import * as nodeService from '../../services/nodeService';
 import Graph from '../Graph';
+import { ROUTES } from '../../routes';
+import { getApiErrorMessage } from '../../utils/apiError';
 import './CreateEdge.css';
 
 const CreateEdge = () => {
@@ -17,8 +19,8 @@ const CreateEdge = () => {
     });
 
     useEffect(() => {
-        nodeService.getAllNodes().then((data) => {
-            const nodes = data;
+        nodeService.getAllNodes().then((result) => {
+            const nodes = Array.isArray(result?.data) ? result.data : [];
             const options = Array.isArray(nodes)
                 ? nodes.map((node) => ({
                     id: String(node.id ?? ''),
@@ -59,16 +61,11 @@ const CreateEdge = () => {
             })
             .then((res) => {
                 if (res?.ok === true) {
-                    navigate('/');
+                    navigate(ROUTES.home);
                     return;
                 }
 
-                const values = Object.values(res?.errorData ?? {});
-                const flattened = values.flatMap((value) =>
-                    Array.isArray(value) ? value : [String(value)]
-                );
-                const message = flattened.join(' ');
-                setErrorMessage(message || 'Unable to create edge.');
+                setErrorMessage(getApiErrorMessage(res, 'Unable to create edge.'));
             })
             .catch(() => {
                 setErrorMessage('Unable to create edge.');
@@ -79,12 +76,12 @@ const CreateEdge = () => {
     };
 
     return (
-        <section className="create-edge-page">
-            <div className="create-edge-page__graph-shell">
+        <section className="create-edge-page page-layout">
+            <div className="create-edge-page__graph-shell page-layout__graph-shell">
                 <Graph />
             </div>
 
-            <aside className="create-edge-page__side-panel">
+            <aside className="create-edge-page__side-panel page-layout__side-panel">
                 <form className="create-edge-form" onSubmit={(event) => event.preventDefault()}>
                     <h2 className="create-edge-form__title">Create Edge</h2>
 
