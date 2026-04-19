@@ -18,15 +18,18 @@
         private readonly IDeletableEntityRepository<NodeModel> nodesRepository;
         private readonly IDeletableEntityRepository<EdgeModel> edgesRepository;
         private readonly IDeletableEntityRepository<NodeModifierModel> nodeModifiersRepository;
+        private readonly IDeletableEntityRepository<ShipmentModel> shipmentRepository;
 
         public GraphManagementService(
             IDeletableEntityRepository<NodeModel> nodesRepository,
             IDeletableEntityRepository<EdgeModel> edgesRepository,
-            IDeletableEntityRepository<NodeModifierModel> nodeModifiersRepository)
+            IDeletableEntityRepository<NodeModifierModel> nodeModifiersRepository,
+            IDeletableEntityRepository<ShipmentModel> shipmentRepository)
         {
             this.nodesRepository = nodesRepository;
             this.edgesRepository = edgesRepository;
             this.nodeModifiersRepository = nodeModifiersRepository;
+            this.shipmentRepository = shipmentRepository;
         }
 
         public async Task<int> AddModifierToNodeAsync(int nodeId, NodeModifierType modifierType, int value)
@@ -184,6 +187,14 @@
                 {
                     throw new InvalidOperationException("Cannot delete a node that has connected edges. Please remove the edges first.");
                 }
+
+                var targetShipments = this.shipmentRepository.All().Where(s => s.StartNodeId == nodeId || s.EndNodeId == nodeId).ToList();
+                foreach (var shipment in targetShipments)
+                {
+                    this.shipmentRepository.Delete(shipment);
+                }
+
+                await this.shipmentRepository.SaveChangesAsync();
 
                 this.nodesRepository.Delete(node);
                 await this.nodesRepository.SaveChangesAsync();

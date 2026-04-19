@@ -7,6 +7,7 @@ import {
     NODE_MODIFIER_TYPE_OPTIONS,
     NODE_TYPE_OPTIONS,
 } from '../../constants/nodeOptions';
+import { useShipments } from '../../contexts/ShipmentContext';
 import { getApiErrorMessage } from '../../utils/apiError';
 import './NodePage.css';
 
@@ -60,6 +61,7 @@ const normalizeNodeData = (detailsData, modifiersData, fallbackId) => {
 const NodePage = () => {
     const { nodeid } = useParams();
     const navigate = useNavigate();
+    const { refreshShipments } = useShipments();
     const [graphRefreshKey, setGraphRefreshKey] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -146,12 +148,13 @@ const NodePage = () => {
         setSaveMessage('');
 
         nodeService.deleteNode(nodeDetails.id)
-            .then((res) => {
+            .then(async (res) => {
                 if (!res?.ok) {
                     setSaveMessage(getApiErrorMessage(res, 'Unable to delete node.'));
                     return;
                 }
 
+                await refreshShipments();
                 setSaveMessage('Node deleted.');
                 navigate(ROUTES.home);
             })
