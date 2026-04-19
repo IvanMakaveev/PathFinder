@@ -1,5 +1,12 @@
 ﻿namespace PathFinder.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
+    using System.Threading.Tasks;
+
     using PathFinder.Data.Common.Repositories;
     using PathFinder.Data.Models;
     using PathFinder.Services.Data;
@@ -7,12 +14,6 @@
     using PathFinder.Services.Data.DTOs;
     using PathFinder.Services.Data.Factories;
     using PathFinder.Services.Mapping;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.Json;
-    using System.Text.Json.Serialization;
-    using System.Threading.Tasks;
 
     public class ShipmentsService : IShipmentsService
     {
@@ -126,7 +127,7 @@
                 .GroupBy(c => c.ParentId.Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            var root = constraints.Where(c => c.ParentId == null).ToList().Single(); ;
+            var root = constraints.Where(c => c.ParentId == null).ToList().Single();
 
             this.AddChildrenToDto(root.Id, constraintDtoById, childrenByParentId);
 

@@ -38,3 +38,16 @@ export const deleteEdge = (edgeId) => {
         fallbackErrorMessage: 'Unable to delete edge.',
     });
 };
+
+export const editEdgeLength = (edgeId, length) => {
+    return request(url + encodeURIComponent(edgeId), {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ length }),
+    }, {
+        responseType: 'none',
+        fallbackErrorMessage: 'Unable to update edge length.',
+    });
+};

@@ -34,6 +34,11 @@
   padding: 0 0.75rem;
   font-size: 0.95rem;
   outline: none;
+  background: var(--color-bg-panel);
+  color: #111827;
+}
+
+.edge-form__input[readonly] {
   background: #f9fafb;
   color: var(--color-text-muted);
 }

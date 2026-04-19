@@ -1,5 +1,10 @@
 ﻿namespace PathFinder.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+
     using Microsoft.EntityFrameworkCore;
     using PathFinder.Data.Common.Repositories;
     using PathFinder.Data.Models;
@@ -7,10 +12,6 @@
     using PathFinder.Services.Data;
     using PathFinder.Services.Data.DTOs;
     using PathFinder.Services.Mapping;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
 
     public class GraphManagementService : IGraphManagementService
     {

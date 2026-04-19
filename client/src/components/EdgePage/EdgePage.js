@@ -37,6 +37,7 @@ const EdgePage = () => {
     const navigate = useNavigate();
     const [graphRefreshKey, setGraphRefreshKey] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [message, setMessage] = useState('');
     const [edgeDetails, setEdgeDetails] = useState(() => normalizeEdgeData(undefined, edgeid));
@@ -113,6 +114,35 @@ const EdgePage = () => {
             });
     };
 
+    const handleEdit = () => {
+        const numericLength = Number(edgeDetails.length);
+
+        if (!Number.isInteger(numericLength) || numericLength <= 0) {
+            setMessage('Length must be a positive integer.');
+            return;
+        }
+
+        setIsSaving(true);
+        setMessage('');
+
+        edgeService.editEdgeLength(edgeDetails.id, numericLength)
+            .then((res) => {
+                if (!res?.ok) {
+                    setMessage(getApiErrorMessage(res, 'Unable to update edge length.'));
+                    return;
+                }
+
+                setMessage('Edge length updated.');
+                setGraphRefreshKey((prev) => prev + 1);
+            })
+            .catch(() => {
+                setMessage('Unable to update edge length.');
+            })
+            .finally(() => {
+                setIsSaving(false);
+            });
+    };
+
     return (
         <section className="edge-page page-layout">
             <div className="edge-page__graph-shell page-layout__graph-shell">
@@ -148,19 +178,34 @@ const EdgePage = () => {
                         <label className="edge-form__field">
                             <span className="edge-form__label">Length</span>
                             <input
-                                type="text"
+                                type="number"
+                                min="1"
+                                step="1"
                                 className="edge-form__input"
                                 value={edgeDetails.length}
-                                readOnly
+                                onChange={(event) =>
+                                    setEdgeDetails((prev) => ({
+                                        ...prev,
+                                        length: event.target.value,
+                                    }))
+                                }
                             />
                         </label>
 
                         <div className="edge-form__actions">
                             <button
                                 type="button"
+                                className="edge-form__submit-button"
+                                onClick={handleEdit}
+                                disabled={isLoading || isSaving || isDeleting || !edgeDetails.id}
+                            >
+                                {isSaving ? 'Saving...' : 'Edit'}
+                            </button>
+                            <button
+                                type="button"
                                 className="edge-form__submit-button edge-form__submit-button--danger"
                                 onClick={handleDelete}
-                                disabled={isDeleting || !edgeDetails.id}
+                                disabled={isLoading || isSaving || isDeleting || !edgeDetails.id}
                             >
                                 {isDeleting ? 'Deleting...' : 'Delete'}
                             </button>
