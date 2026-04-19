@@ -85,6 +85,16 @@
 
         public async Task<int> CreateEdgeAsync(int fromNodeId, int toNodeId, int length)
         {
+            if (length <= 0)
+            {
+                throw new ArgumentException("Edge length must be a positive integer.");
+            }
+
+            if (fromNodeId == toNodeId)
+            {
+                throw new ArgumentException("From and To nodes cannot be the same.");
+            }
+
             if (!this.nodesRepository.AllAsNoTracking().Any(n => n.Id == fromNodeId))
             {
                 throw new KeyNotFoundException($"From node with ID {fromNodeId} not found.");
@@ -115,6 +125,11 @@
 
         public async Task<int> CreateNodeAsync(string name, NodeType nodeType)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Node name cannot be empty.");
+            }
+
             var node = new NodeModel
             {
                 Name = name,

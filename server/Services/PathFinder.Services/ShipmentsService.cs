@@ -17,13 +17,16 @@
 
     public class ShipmentsService : IShipmentsService
     {
+        private readonly IDeletableEntityRepository<NodeModel> nodesRepository;
         private readonly IDeletableEntityRepository<ShipmentModel> shipmentRepository;
         private readonly IDeletableEntityRepository<ShipmentConstraintModel> constraintRepository;
 
         public ShipmentsService(
+            IDeletableEntityRepository<NodeModel> nodesRepository,
             IDeletableEntityRepository<ShipmentModel> shipmentRepository,
             IDeletableEntityRepository<ShipmentConstraintModel> constraintRepository)
         {
+            this.nodesRepository = nodesRepository;
             this.shipmentRepository = shipmentRepository;
             this.constraintRepository = constraintRepository;
         }
@@ -69,6 +72,26 @@
 
         public async Task<int> CreateShipmentAsync(string name, string description, int startNodeId, int endNodeId)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Shipment name cannot be empty.");
+            }
+
+            if (startNodeId == endNodeId)
+            {
+                throw new ArgumentException("Start and End nodes cannot be the same.");
+            }
+
+            if (!this.nodesRepository.AllAsNoTracking().Any(n => n.Id == startNodeId))
+            {
+                throw new KeyNotFoundException($"Start node with ID {startNodeId} not found.");
+            }
+
+            if (!this.nodesRepository.AllAsNoTracking().Any(n => n.Id == endNodeId))
+            {
+                throw new KeyNotFoundException($"End node with ID {endNodeId} not found.");
+            }
+
             var shipment = new ShipmentModel
             {
                 Name = name,

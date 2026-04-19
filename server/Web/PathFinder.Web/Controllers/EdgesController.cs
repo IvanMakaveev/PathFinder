@@ -83,6 +83,11 @@
                 this.ModelState.AddModelError("edge", ie.Message);
                 return this.BadRequest(this.ModelState);
             }
+            catch (ArgumentException ae)
+            {
+                this.ModelState.AddModelError("edge", ae.Message);
+                return this.BadRequest(this.ModelState);
+            }
             catch (KeyNotFoundException ke)
             {
                 this.ModelState.AddModelError("nodes", ke.Message);

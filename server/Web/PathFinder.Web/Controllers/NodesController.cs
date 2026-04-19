@@ -79,8 +79,16 @@
                 return this.BadRequest(this.ModelState);
             }
 
-            var nodeId = await this.graphManagementService.CreateNodeAsync(input.Name, Enum.Parse<NodeType>(input.NodeType));
-            return new JsonResult(nodeId);
+            try
+            {
+                var nodeId = await this.graphManagementService.CreateNodeAsync(input.Name, Enum.Parse<NodeType>(input.NodeType));
+                return new JsonResult(nodeId);
+            }
+            catch (ArgumentException ae)
+            {
+                this.ModelState.AddModelError("node", ae.Message);
+                return this.BadRequest(this.ModelState);
+            }
         }
 
         [HttpPost("/nodes/{id:int}/modifiers")]

@@ -100,8 +100,21 @@
                 return this.BadRequest(this.ModelState);
             }
 
-            var shipmentId = await this.shipmentsService.CreateShipmentAsync(model.Name, model.Description, model.StartNodeId, model.EndNodeId);
-            return new JsonResult(shipmentId);
+            try
+            {
+                var shipmentId = await this.shipmentsService.CreateShipmentAsync(model.Name, model.Description, model.StartNodeId, model.EndNodeId);
+                return new JsonResult(shipmentId);
+            }
+            catch (ArgumentException ae)
+            {
+                this.ModelState.AddModelError("shipment", ae.Message);
+                return this.BadRequest(this.ModelState);
+            }
+            catch (KeyNotFoundException ke)
+            {
+                this.ModelState.AddModelError("node", ke.Message);
+                return this.NotFound(this.ModelState);
+            }
         }
     }
 }
